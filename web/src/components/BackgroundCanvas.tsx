@@ -102,8 +102,8 @@ export const BackgroundCanvas: React.FC = () => {
     let rows: CanvasRow[] = [];
     let W = window.innerWidth;
     let H = window.innerHeight;
-    let cw = 8;
-    const LH = 21;
+    let cw = 8.5;
+    const LH = 29;
     let mx = -1;
     let my = -1;
     let last = 0;
@@ -113,13 +113,13 @@ export const BackgroundCanvas: React.FC = () => {
       const segs: RowSegment[] = [];
       let s = '';
       let len = 0;
-      const target = Math.ceil(W / cw) * 1.6 + 40;
+      const target = Math.ceil(W / cw) * 1.5 + 40;
       while (len < target) {
         const url = Math.random() < 0.5 ? mkGood() : mkBad();
         const f = feats(url);
         const sc = f ? score(f) : { p: 0.5, why: [] };
         segs.push({ a: s.length, b: s.length + url.length, url, p: sc.p });
-        s += url + '   ';
+        s += url + '       ';
         len = s.length;
       }
       return {
@@ -127,7 +127,7 @@ export const BackgroundCanvas: React.FC = () => {
         segs,
         L: s.length,
         off: Math.random() * s.length * cw,
-        v: (8 + Math.random() * 20) * (i % 2 ? 1 : -1)
+        v: (7 + Math.random() * 16) * (i % 2 ? 1 : -1)
       };
     }
 
@@ -139,8 +139,8 @@ export const BackgroundCanvas: React.FC = () => {
       cv.width = W * d;
       cv.height = H * d;
       cx.setTransform(d, 0, 0, d, 0, 0);
-      cx.font = '400 13px "Geist Mono", ui-monospace, Menlo, monospace';
-      cw = cx.measureText('M').width || 8;
+      cx.font = '400 14px "Geist Mono", ui-monospace, Menlo, monospace';
+      cw = cx.measureText('M').width || 8.5;
       rows = Array.from({ length: Math.ceil(H / LH) + 1 }, (_, i) => mkRow(i));
     }
 
@@ -149,10 +149,11 @@ export const BackgroundCanvas: React.FC = () => {
       const dt = Math.min(0.05, (t - last) / 1000 || 0);
       last = t;
       cx.clearRect(0, 0, W, H);
-      cx.font = '400 13px "Geist Mono", ui-monospace, Menlo, monospace';
+      cx.font = '400 14px "Geist Mono", ui-monospace, Menlo, monospace';
       cx.textBaseline = 'middle';
 
       const hr = my >= 0 ? Math.floor(my / LH) : -9;
+      let activePill: { text: string; col: string; sub?: string } | null = null;
 
       rows.forEach((r, i) => {
         if (!reduce) {
@@ -165,10 +166,10 @@ export const BackgroundCanvas: React.FC = () => {
 
         cx.fillStyle =
           near === 0
-            ? 'rgba(20,22,27,.065)'
+            ? 'rgba(20,22,27,.075)'
             : near === 1
-            ? 'rgba(20,22,27,.04)'
-            : 'rgba(95,106,125,.028)';
+            ? 'rgba(20,22,27,.045)'
+            : 'rgba(95,106,125,.03)';
         cx.fillText(r.s, x0, y);
         cx.fillText(r.s, x0 + P, y);
 
@@ -177,20 +178,52 @@ export const BackgroundCanvas: React.FC = () => {
           ci = ((ci % r.L) + r.L) % r.L;
           const sg = r.segs.find(g => ci >= g.a && ci < g.b);
           if (sg) {
-            const bad = sg.p >= 0.5;
+            // Live real-time scoring on the exact hovered address
+            const liveFeats = feats(sg.url);
+            const liveScore = liveFeats ? score(liveFeats) : { p: sg.p, why: [] };
+            const bad = liveScore.p >= 0.5;
             const col = bad ? '217,45,58' : '18,128,92';
+            const pct = Math.round(liveScore.p * 100);
+
             [x0, x0 + P].forEach(bx => {
               const x = bx + sg.a * cw;
               if (x + sg.url.length * cw > 0 && x < W) {
-                cx.fillStyle = `rgba(${col},.08)`;
-                cx.fillRect(x - 3, y - LH / 2 + 1, sg.url.length * cw + 6, LH - 2);
+                cx.fillStyle = `rgba(${col},.1)`;
+                cx.fillRect(x - 3, y - LH / 2 + 2, sg.url.length * cw + 6, LH - 4);
                 cx.fillStyle = `rgb(${col})`;
                 cx.fillText(sg.url, x, y);
               }
             });
+
+            activePill = {
+              text: `${bad ? '▲ MALICIOUS' : '● BENIGN'} ${pct}%`,
+              col,
+              sub: liveScore.why[0] || (bad ? 'structural risk' : 'clean format')
+            };
           }
         }
       });
+
+      // Refined real-time telemetry badge
+      if (activePill) {
+        const pill = activePill as { text: string; col: string; sub?: string };
+        cx.font = '500 11.5px "Geist Mono", monospace';
+        const label = pill.sub ? `${pill.text} · ${pill.sub}` : pill.text;
+        const tw = cx.measureText(label).width + 20;
+        const tx = Math.min(mx + 12, W - tw - 12);
+        const ty = Math.min(my + 14, H - 28);
+
+        cx.fillStyle = '#ffffff';
+        cx.strokeStyle = `rgba(${pill.col}, 0.5)`;
+        cx.lineWidth = 1;
+        cx.beginPath();
+        cx.roundRect(tx, ty, tw, 22, 5);
+        cx.fill();
+        cx.stroke();
+
+        cx.fillStyle = `rgb(${pill.col})`;
+        cx.fillText(label, tx + 10, ty + 11.5);
+      }
 
       animId = requestAnimationFrame(draw);
     }
