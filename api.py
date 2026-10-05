@@ -59,7 +59,7 @@ class PredictionHandler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
-            self.wfile.write(json.dumps({"status": "ok", "service": "URL_Guard ML API", "model": "Random Forest (100 Trees)"}).encode("utf-8"))
+            self.wfile.write(json.dumps({"status": "ok", "service": "URL_Guard ML API", "model": f"Random Forest ({len(model.estimators_)} Trees)"}).encode("utf-8"))
         else:
             self.send_response(404)
             self.end_headers()
@@ -146,7 +146,7 @@ class PredictionHandler(BaseHTTPRequestHandler):
             "dominant_prob": dominant_prob,
             "latency_ms": round(latency_ms, 3),
             "features": feats,
-            "engine": "Scikit-Learn Random Forest (100 Trees)"
+            "engine": f"Scikit-Learn Random Forest ({len(model.estimators_)} Trees)"
         }
 
         self.send_response(200)
