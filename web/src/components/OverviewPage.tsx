@@ -20,7 +20,7 @@ export const OverviewPage: React.FC = () => {
           </div>
           <p className="hint">
             <b />
-            Move your cursor over the background. Every line is a synthetic URL, scored live in your browser.
+            Move your cursor over the background. Synthetic streams evaluated instantly via client-side lexical heuristics.
           </p>
         </section>
 
