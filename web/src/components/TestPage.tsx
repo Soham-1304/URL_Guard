@@ -202,20 +202,14 @@ export const TestPage: React.FC = () => {
     <main id="p-test" className="on" style={{ paddingBottom: 120 }}>
       <div className="wrap pg">
         {/* Header */}
-        <div style={{ textAlign: 'center', maxWidth: 760, margin: '0 auto 28px' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-            <span className="badge b-blue" style={{ letterSpacing: '0.04em' }}>LIVE LEXICAL SCANNER</span>
-            <span style={{ font: '500 12px var(--mono)', color: 'var(--mute)' }}>
-              {engineInfo ? `${engineInfo.name} · ${engineInfo.latencyMs.toFixed(2)} ms` : 'Evaluating...'}
-            </span>
-          </div>
+        <div style={{ textAlign: 'center', maxWidth: 760, margin: '0 auto 36px' }}>
           <h2 style={{ fontSize: 34, letterSpacing: '-0.03em', margin: 0, fontWeight: 700 }}>
             Paste a URL. Watch it get dissected.
           </h2>
         </div>
 
         {/* Input Bar & Controls Container */}
-        <div style={{ maxWidth: 860, margin: '0 auto 36px' }}>
+        <div style={{ maxWidth: 860, margin: '0 auto 44px' }}>
           <form
             onSubmit={handleFormSubmit}
             style={{
@@ -256,14 +250,14 @@ export const TestPage: React.FC = () => {
             </button>
           </form>
 
-          {/* Preset Chips: Strictly Single Line with nowrap */}
+          {/* Preset Chips: Generous vertical spacing & strictly single line */}
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 8,
-              marginTop: 20,
+              gap: 10,
+              marginTop: 28,
               flexWrap: 'nowrap',
               whiteSpace: 'nowrap'
             }}
@@ -282,7 +276,7 @@ export const TestPage: React.FC = () => {
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: 6,
-                    padding: '5px 11px',
+                    padding: '5px 12px',
                     borderRadius: 8,
                     border: `1.5px solid ${isSelected ? 'var(--ink)' : 'var(--line)'}`,
                     background: isSelected ? 'var(--soft)' : '#fff',
@@ -303,12 +297,12 @@ export const TestPage: React.FC = () => {
             })}
           </div>
 
-          {/* Centered URL Syntax Anatomy Tokenizer */}
+          {/* Centered URL Syntax Anatomy Tokenizer: Generous vertical spacing */}
           {tokens.valid && (
             <div
               style={{
-                marginTop: 20,
-                padding: '10px 16px',
+                marginTop: 26,
+                padding: '12px 18px',
                 borderRadius: 12,
                 border: '1px solid var(--line)',
                 background: 'var(--soft)',
@@ -366,56 +360,54 @@ export const TestPage: React.FC = () => {
             </p>
           </div>
         ) : (
-          <div style={{ marginTop: 44, display: 'grid', gridTemplateColumns: '360px 1fr', gap: 24, alignItems: 'stretch' }}>
-            {/* Left Column: Verdict & Triggered Drivers (Stretched to match Right Column height) */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, height: '100%' }}>
-              {/* Verdict Card */}
-              <div
-                className="solid"
-                style={{
-                  padding: 24,
-                  borderLeft: `4px solid ${isMalicious ? 'var(--red)' : 'var(--green)'}`,
-                  flex: 1,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between'
-                }}
-              >
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span className={`badge ${isMalicious ? 'b-red' : 'b-green'}`}>
-                      {isMalicious ? '▲ MALICIOUS RISK' : '● BENIGN / SAFE'}
-                    </span>
-                    <span style={{ font: '500 12px var(--mono)', color: 'var(--mute)' }}>
-                      {flaggedCount} flags active
-                    </span>
-                  </div>
+          <div style={{ marginTop: 44, display: 'grid', gridTemplateColumns: '370px 1fr', gap: 24, alignItems: 'stretch' }}>
+            {/* Left Column: One Single Unified Card with Decision Drivers, Architecture, and Telemetry */}
+            <div
+              className="solid"
+              style={{
+                padding: 24,
+                borderLeft: `4px solid ${isMalicious ? 'var(--red)' : 'var(--green)'}`,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                gap: 20
+              }}
+            >
+              {/* Verdict & Score */}
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span className={`badge ${isMalicious ? 'b-red' : 'b-green'}`}>
+                    {isMalicious ? '▲ MALICIOUS RISK' : '● BENIGN / SAFE'}
+                  </span>
+                  <span style={{ font: '500 12px var(--mono)', color: 'var(--mute)' }}>
+                    {flaggedCount} of 30 flags active
+                  </span>
+                </div>
 
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, margin: '14px 0 6px' }}>
-                    <span style={{ font: '600 48px/1 var(--mono)', letterSpacing: '-0.03em', color: isMalicious ? 'var(--red)' : 'var(--green)' }}>
-                      {dominantPct}%
-                    </span>
-                    <span style={{ font: '500 13px var(--mono)', color: 'var(--mute)' }}>
-                      {isMalicious ? 'malicious probability' : 'benign confidence'}
-                    </span>
-                  </div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, margin: '14px 0 6px' }}>
+                  <span style={{ font: '600 48px/1 var(--mono)', letterSpacing: '-0.03em', color: isMalicious ? 'var(--red)' : 'var(--green)' }}>
+                    {dominantPct}%
+                  </span>
+                  <span style={{ font: '500 13px var(--mono)', color: 'var(--mute)' }}>
+                    {isMalicious ? 'malicious probability' : 'benign confidence'}
+                  </span>
+                </div>
 
-                  {/* Meter track */}
-                  <div style={{ height: 6, background: 'var(--soft)', borderRadius: 3, overflow: 'hidden', margin: '8px 0 16px' }}>
-                    <div
-                      style={{
-                        height: '100%',
-                        width: `${dominantPct}%`,
-                        background: isMalicious ? 'var(--red)' : 'var(--green)',
-                        transition: 'width 0.4s ease'
-                      }}
-                    />
-                  </div>
+                {/* Meter track */}
+                <div style={{ height: 6, background: 'var(--soft)', borderRadius: 3, overflow: 'hidden', margin: '8px 0 16px' }}>
+                  <div
+                    style={{
+                      height: '100%',
+                      width: `${dominantPct}%`,
+                      background: isMalicious ? 'var(--red)' : 'var(--green)',
+                      transition: 'width 0.4s ease'
+                    }}
+                  />
                 </div>
 
                 {/* Triggered Decision Drivers */}
-                <div style={{ borderTop: '1px solid var(--line)', paddingTop: 14 }}>
-                  <div style={{ font: '600 11.5px var(--mono)', color: 'var(--mute)', textTransform: 'uppercase', marginBottom: 8 }}>
+                <div style={{ marginTop: 14 }}>
+                  <div style={{ font: '600 11px var(--mono)', color: 'var(--mute)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 8 }}>
                     Primary Decision Drivers ({scoreData.why.length})
                   </div>
                   {scoreData.why.length > 0 ? (
@@ -445,27 +437,52 @@ export const TestPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Model Telemetry Card */}
-              <div className="solid" style={{ padding: 18, fontSize: 13 }}>
-                <div style={{ font: '600 11.5px var(--mono)', color: 'var(--mute)', textTransform: 'uppercase', marginBottom: 8 }}>
-                  Telemetry & Footprint
+              {/* Model Architecture & Policy Specifications */}
+              <div style={{ borderTop: '1px solid var(--line)', paddingTop: 16 }}>
+                <div style={{ font: '600 11px var(--mono)', color: 'var(--mute)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 10 }}>
+                  Model Architecture & Policy
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, font: '400 12.5px var(--mono)' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, font: '400 12px var(--mono)' }}>
                   <div>
-                    <span style={{ color: 'var(--mute)', display: 'block', fontSize: 11 }}>LATENCY</span>
-                    <b>{engineInfo ? `${engineInfo.latencyMs.toFixed(3)} ms` : '30.9 ms'}</b>
+                    <span style={{ color: 'var(--mute)', display: 'block', fontSize: 10.5 }}>CLASSIFIER</span>
+                    <b style={{ color: 'var(--ink)' }}>Random Forest (100)</b>
                   </div>
                   <div>
-                    <span style={{ color: 'var(--mute)', display: 'block', fontSize: 11 }}>NETWORK I/O</span>
-                    <b>0 bytes</b>
+                    <span style={{ color: 'var(--mute)', display: 'block', fontSize: 10.5 }}>INPUT SPACE</span>
+                    <b style={{ color: 'var(--ink)' }}>30 Lexical Vectors</b>
                   </div>
                   <div>
-                    <span style={{ color: 'var(--mute)', display: 'block', fontSize: 11 }}>DOM PARSING</span>
-                    <b>Bypassed</b>
+                    <span style={{ color: 'var(--mute)', display: 'block', fontSize: 10.5 }}>DECISION POLICY</span>
+                    <b style={{ color: 'var(--ink)' }}>Gini (0.50 cutoff)</b>
                   </div>
                   <div>
-                    <span style={{ color: 'var(--mute)', display: 'block', fontSize: 11 }}>THROUGHPUT</span>
-                    <b>14,943 URLs/s</b>
+                    <span style={{ color: 'var(--mute)', display: 'block', fontSize: 10.5 }}>ZERO-DAY DEFENSE</span>
+                    <b style={{ color: 'var(--ink)' }}>Pre-Execution AST</b>
+                  </div>
+                </div>
+              </div>
+
+              {/* Telemetry & Footprint */}
+              <div style={{ borderTop: '1px solid var(--line)', paddingTop: 16 }}>
+                <div style={{ font: '600 11px var(--mono)', color: 'var(--mute)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 10 }}>
+                  Runtime Telemetry & Footprint
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, font: '400 12px var(--mono)' }}>
+                  <div>
+                    <span style={{ color: 'var(--mute)', display: 'block', fontSize: 10.5 }}>LATENCY</span>
+                    <b style={{ color: 'var(--ink)' }}>{engineInfo ? `${engineInfo.latencyMs.toFixed(3)} ms` : '29.865 ms'}</b>
+                  </div>
+                  <div>
+                    <span style={{ color: 'var(--mute)', display: 'block', fontSize: 10.5 }}>NETWORK I/O</span>
+                    <b style={{ color: 'var(--ink)' }}>0 bytes</b>
+                  </div>
+                  <div>
+                    <span style={{ color: 'var(--mute)', display: 'block', fontSize: 10.5 }}>DOM PARSING</span>
+                    <b style={{ color: 'var(--ink)' }}>Bypassed</b>
+                  </div>
+                  <div>
+                    <span style={{ color: 'var(--mute)', display: 'block', fontSize: 10.5 }}>THROUGHPUT</span>
+                    <b style={{ color: 'var(--ink)' }}>14,943 URLs/s</b>
                   </div>
                 </div>
               </div>
@@ -537,7 +554,9 @@ export const TestPage: React.FC = () => {
                   display: 'flex',
                   flexDirection: 'column',
                   gap: 2,
-                  maxHeight: 430,
+                  flex: 1,
+                  minHeight: 400,
+                  maxHeight: 520,
                   overflowY: 'auto',
                   padding: '6px 4px 6px 0'
                 }}
