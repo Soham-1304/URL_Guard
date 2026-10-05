@@ -13,15 +13,15 @@ interface PresetItem {
 const PRESETS: PresetItem[] = [
   {
     id: 'paypal',
-    name: 'PayPal Phishing',
-    category: 'Phishing',
+    name: 'PayPal Phish',
+    category: 'Phish',
     categoryCls: 'b-red',
     url: 'http://paypal-verification-account-security.com/login.php?update=true'
   },
   {
     id: 'mirai',
     name: 'Raw IP Malware',
-    category: 'Botnet Payload',
+    category: 'Botnet',
     categoryCls: 'b-red',
     url: 'http://175.173.82.102:52403/bin.sh'
   },
@@ -256,18 +256,19 @@ export const TestPage: React.FC = () => {
             </button>
           </form>
 
-          {/* Preset Chips: Clean flex container with zero clipping */}
+          {/* Preset Chips: Strictly Single Line with nowrap */}
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 10,
-              marginTop: 18,
-              flexWrap: 'wrap'
+              gap: 8,
+              marginTop: 20,
+              flexWrap: 'nowrap',
+              whiteSpace: 'nowrap'
             }}
           >
-            <span style={{ font: '600 11px var(--mono)', color: 'var(--mute)', whiteSpace: 'nowrap', letterSpacing: '0.04em' }}>
+            <span style={{ font: '600 11px var(--mono)', color: 'var(--mute)', whiteSpace: 'nowrap', letterSpacing: '0.04em', flexShrink: 0 }}>
               SAMPLE THREATS:
             </span>
             {PRESETS.map(p => {
@@ -281,13 +282,15 @@ export const TestPage: React.FC = () => {
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: 6,
-                    padding: '6px 13px',
+                    padding: '5px 11px',
                     borderRadius: 8,
                     border: `1.5px solid ${isSelected ? 'var(--ink)' : 'var(--line)'}`,
                     background: isSelected ? 'var(--soft)' : '#fff',
                     font: '500 12px var(--mono)',
                     color: isSelected ? 'var(--ink)' : '#475467',
                     cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
                     transition: 'all 0.15s ease'
                   }}
                 >
@@ -304,7 +307,7 @@ export const TestPage: React.FC = () => {
           {tokens.valid && (
             <div
               style={{
-                marginTop: 18,
+                marginTop: 20,
                 padding: '10px 16px',
                 borderRadius: 12,
                 border: '1px solid var(--line)',
@@ -356,52 +359,58 @@ export const TestPage: React.FC = () => {
 
         {/* Results Overview */}
         {!extracted || !scoreData ? (
-          <div className="solid" style={{ marginTop: 32, padding: 28, textAlign: 'center' }}>
+          <div className="solid" style={{ marginTop: 44, padding: 32, textAlign: 'center' }}>
             <h3>Invalid Address</h3>
             <p style={{ color: 'var(--mute)', fontSize: 14, marginTop: 4 }}>
               Enter a valid URL address with a registered host name.
             </p>
           </div>
         ) : (
-          <div style={{ marginTop: 32, display: 'grid', gridTemplateColumns: '360px 1fr', gap: 24 }}>
-            {/* Left Column: Verdict & Triggered Drivers */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div style={{ marginTop: 44, display: 'grid', gridTemplateColumns: '360px 1fr', gap: 24, alignItems: 'stretch' }}>
+            {/* Left Column: Verdict & Triggered Drivers (Stretched to match Right Column height) */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, height: '100%' }}>
               {/* Verdict Card */}
               <div
                 className="solid"
                 style={{
                   padding: 24,
-                  borderLeft: `4px solid ${isMalicious ? 'var(--red)' : 'var(--green)'}`
+                  borderLeft: `4px solid ${isMalicious ? 'var(--red)' : 'var(--green)'}`,
+                  flex: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between'
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span className={`badge ${isMalicious ? 'b-red' : 'b-green'}`}>
-                    {isMalicious ? '▲ MALICIOUS RISK' : '● BENIGN / SAFE'}
-                  </span>
-                  <span style={{ font: '500 12px var(--mono)', color: 'var(--mute)' }}>
-                    {flaggedCount} flags active
-                  </span>
-                </div>
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span className={`badge ${isMalicious ? 'b-red' : 'b-green'}`}>
+                      {isMalicious ? '▲ MALICIOUS RISK' : '● BENIGN / SAFE'}
+                    </span>
+                    <span style={{ font: '500 12px var(--mono)', color: 'var(--mute)' }}>
+                      {flaggedCount} flags active
+                    </span>
+                  </div>
 
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, margin: '14px 0 6px' }}>
-                  <span style={{ font: '600 48px/1 var(--mono)', letterSpacing: '-0.03em', color: isMalicious ? 'var(--red)' : 'var(--green)' }}>
-                    {dominantPct}%
-                  </span>
-                  <span style={{ font: '500 13px var(--mono)', color: 'var(--mute)' }}>
-                    {isMalicious ? 'malicious probability' : 'benign confidence'}
-                  </span>
-                </div>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, margin: '14px 0 6px' }}>
+                    <span style={{ font: '600 48px/1 var(--mono)', letterSpacing: '-0.03em', color: isMalicious ? 'var(--red)' : 'var(--green)' }}>
+                      {dominantPct}%
+                    </span>
+                    <span style={{ font: '500 13px var(--mono)', color: 'var(--mute)' }}>
+                      {isMalicious ? 'malicious probability' : 'benign confidence'}
+                    </span>
+                  </div>
 
-                {/* Meter track */}
-                <div style={{ height: 6, background: 'var(--soft)', borderRadius: 3, overflow: 'hidden', margin: '8px 0 16px' }}>
-                  <div
-                    style={{
-                      height: '100%',
-                      width: `${dominantPct}%`,
-                      background: isMalicious ? 'var(--red)' : 'var(--green)',
-                      transition: 'width 0.4s ease'
-                    }}
-                  />
+                  {/* Meter track */}
+                  <div style={{ height: 6, background: 'var(--soft)', borderRadius: 3, overflow: 'hidden', margin: '8px 0 16px' }}>
+                    <div
+                      style={{
+                        height: '100%',
+                        width: `${dominantPct}%`,
+                        background: isMalicious ? 'var(--red)' : 'var(--green)',
+                        transition: 'width 0.4s ease'
+                      }}
+                    />
+                  </div>
                 </div>
 
                 {/* Triggered Decision Drivers */}
@@ -463,7 +472,7 @@ export const TestPage: React.FC = () => {
             </div>
 
             {/* Right Column: 30 Features Inspector */}
-            <div className="solid" style={{ padding: 22 }}>
+            <div className="solid" style={{ padding: 22, display: 'flex', flexDirection: 'column', height: '100%' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
                 <div style={{ font: '600 15px var(--sans)' }}>
                   Lexical Feature Spectrum ({filteredFeatures.length})
