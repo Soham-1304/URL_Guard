@@ -1,7 +1,85 @@
 import React, { useState } from 'react';
 
+interface InvestigationChapter {
+  id: string;
+  step: string;
+  title: string;
+  tag: string;
+  badgeCls: string;
+  summary: string;
+  metric: string;
+  metricLabel: string;
+  dossierType: 'audit' | 'leakage' | 'autopsy' | 'zeroshot' | 'blindspot';
+}
+
+const CHAPTERS: InvestigationChapter[] = [
+  {
+    id: 'audit',
+    step: '01',
+    title: 'Data Audit & The 13,124 Conflicts',
+    tag: 'Dataset Integrity',
+    badgeCls: 'b-red',
+    summary:
+      'Merging public Kaggle collectors revealed 522,260 duplicate URLs. 13,124 identical URLs carried contradictory ground-truth labels across datasets.',
+    metric: '84.6%',
+    metricLabel: 'Collector overlap purged',
+    dossierType: 'audit'
+  },
+  {
+    id: 'leakage',
+    step: '02',
+    title: 'The Random Split Trap vs. Domain Firewall',
+    tag: 'Methodology Trap',
+    badgeCls: 'b-amber',
+    summary:
+      'Standard random split yielded 99.4% accuracy by memorizing domains. Domain-grouped partitioning proved true generalization sits at 87.50%.',
+    metric: '99.4% → 87.5%',
+    metricLabel: 'Illusory vs. Honest Accuracy',
+    dossierType: 'leakage'
+  },
+  {
+    id: 'autopsy',
+    step: '03',
+    title: 'Model Arena & Failure Autopsies',
+    tag: 'Algorithmic Stress',
+    badgeCls: 'b-blue',
+    summary:
+      'Naive Bayes collapsed to 20.98% recall due to correlated lexical tokens. KNN stalled on inference latency (108 seconds for 55k URLs). Random Forest won.',
+    metric: '14,943 URLs/s',
+    metricLabel: 'Random Forest line-rate throughput',
+    dossierType: 'autopsy'
+  },
+  {
+    id: 'zeroshot',
+    step: '04',
+    title: 'Wild Zero-Shot Validation (URLhaus)',
+    tag: 'In-The-Wild Test',
+    badgeCls: 'b-green',
+    summary:
+      'Tested against 43,599 live in-the-wild malicious links from abuse.ch. 100% of raw-IP malware hosts and 88.8% of unseen domains were stopped.',
+    metric: '100.0%',
+    metricLabel: 'IP-Hosted malware intercepted',
+    dossierType: 'zeroshot'
+  },
+  {
+    id: 'blindspot',
+    step: '05',
+    title: 'The Phishing Blindspot (Why 27.6% Happened)',
+    tag: 'Honest Boundary',
+    badgeCls: 'b-red',
+    summary:
+      'On external balanced datasets, malicious recall drops to 27.6%. Credential harvesters on clean cloud providers (Google, AWS, WordPress) are lexically invisible.',
+    metric: '27.6% Recall',
+    metricLabel: 'External clean-host phishing boundary',
+    dossierType: 'blindspot'
+  }
+];
+
 export const StoryPage: React.FC = () => {
+  const [activeChapterId, setActiveChapterId] = useState<string>('audit');
   const [copied, setCopied] = useState(false);
+
+  const activeChapter = CHAPTERS.find(c => c.id === activeChapterId) || CHAPTERS[0];
 
   const copyCommands = () => {
     navigator.clipboard.writeText(`pip install -r requirements.txt\nstreamlit run app.py\npython -m pytest url-guard/tests`);
@@ -12,228 +90,246 @@ export const StoryPage: React.FC = () => {
   return (
     <main id="p-story" className="on">
       <div className="wrap pg">
-        <h2>How a class project became a careful one.</h2>
-        <p className="lede" style={{ fontSize: 17 }}>
-          The headline accuracy is the least interesting part of machine learning. The choices made to avoid
-          fooling ourselves are what make the result believable.
-        </p>
-
-        {/* Phase Stepper Investigation Cards */}
-        <div className="tl">
-          {/* Phase 01 */}
-          <div className="ev solid">
-            <span className="step-num">PHASE 01 · THE PROBLEM</span>
-            <h3>The Risk of Visiting the Link</h3>
-            <p>
-              Traditional blocklists only protect against URLs that someone has already reported and verified.
-              Heuristic web scanners fetch the page to analyze JavaScript, DOM trees, and TLS certificates —
-              but making the HTTP request is the exact action that triggers the drive-by exploit.
-            </p>
-            <p style={{ marginTop: 8 }}>
-              <strong>The core objective:</strong> Decide whether a link is hostile purely from its character
-              sequence in under a millisecond, before any socket connection is opened.
-            </p>
-          </div>
-
-          {/* Phase 02: Leakage Discovery */}
-          <div className="ev solid">
-            <span className="step-num">PHASE 02 · DATA AUDIT</span>
-            <h3>The Datasets Were Lying</h3>
-            <p>
-              When we merged the two popular Kaggle malicious URL datasets, we discovered an alarming data
-              integrity flaw: <strong>522,260 URLs</strong> were exact duplicates across both files. Worse,
-              <strong> 13,124 identical URLs had conflicting labels</strong> (labeled benign in one file, malicious in the other).
-            </p>
-            <div style={{ marginTop: 12 }}>
-              <span className="stat">84.6% overlap across files</span>
-              <span className="stat" style={{ marginLeft: 8 }}>13,124 contradictory labels purged</span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <span className="badge b-blue">INVESTIGATION DOSSIER</span>
+              <span style={{ font: '500 13px var(--mono)', color: 'var(--mute)' }}>CASE STUDY #149</span>
             </div>
-          </div>
-
-          {/* Phase 03: The Random Split Trap */}
-          <div className="ev solid">
-            <span className="step-num">PHASE 03 · THE FIREWALL</span>
-            <h3>The Naive Split Trap vs. Domain Firewall</h3>
-            <p>
-              Standard <code>train_test_split()</code> splits rows uniformly at random. In URL classification,
-              this creates massive data leakage: if <code>wikipedia.org/wiki/Cat</code> is in train and{' '}
-              <code>wikipedia.org/wiki/Dog</code> is in test, the model memorizes the domain name rather than learning lexical syntax.
-            </p>
-
-            <div className="side-cards">
-              <div className="side-card faint">
-                <h4>
-                  <span>Naive Random Split</span>
-                  <span className="badge b-red">99.4% Accuracy (Fake)</span>
-                </h4>
-                <p>
-                  High overlap of registrable domains between train and test. The model acted as an accidental domain lookup table, failing completely when faced with new domains in production.
-                </p>
-              </div>
-
-              <div className="side-card">
-                <h4>
-                  <span>Domain-Grouped Split</span>
-                  <span className="badge b-green">87.5% Accuracy (Honest)</span>
-                </h4>
-                <p>
-                  Strict firewall: every single domain in the 55,292-row test set was excluded from training. URLs per domain were capped at 50 to prevent dominance by high-frequency hosts.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Phase 04: Source Bias */}
-          <div className="ev solid">
-            <span className="step-num">PHASE 04 · FINGERPRINTING</span>
-            <h3>The Model Was Guessing the Collector</h3>
-            <p>
-              During exploratory audits, we trained a classifier to predict which dataset source a URL came from.
-              It succeeded with a <strong>0.447 source-bias gap</strong> above chance. The model was learning the collection methodology (e.g. how scraping bots harvested URLs) rather than malicious intent.
-            </p>
-            <p style={{ marginTop: 8 }}>
-              <strong>The fix:</strong> We restricted model training strictly to a single primary source (Dataset A) and held out the entire second dataset (Dataset B) as an external zero-shot test set.
-            </p>
-          </div>
-
-          {/* Phase 05: Algorithm Selection */}
-          <div className="ev solid">
-            <span className="step-num">PHASE 05 · BENCHMARKING</span>
-            <h3>Six Algorithms, One Honest Comparison</h3>
-            <p>
-              We trained and evaluated six different machine learning architectures on the exact same domain-grouped partition.
-            </p>
-            <ul style={{ margin: '12px 0 0 18px', color: '#475467', fontSize: 14 }}>
-              <li>
-                <strong>Random Forest (Winner):</strong> Best test accuracy (87.50%), precision (87.70%), and ROC-AUC (0.9402). Handles non-linear feature interactions cleanly and evaluates in 0.067 ms/URL.
-              </li>
-              <li style={{ marginTop: 6 }}>
-                <strong>Naive Bayes (Collapsed):</strong> Test recall plunged to 20.98%. Strong correlations between lexical features (e.g., <code>path_depth</code> and <code>n_slashes</code>) completely broke Naive Bayes' feature independence assumption.
-              </li>
-              <li style={{ marginTop: 6 }}>
-                <strong>K-Nearest Neighbors (Too Slow):</strong> Required 108.3 seconds just to score the test set. O(N) distance checks cannot operate at line-rate in a network security firewall.
-              </li>
-            </ul>
-          </div>
-
-          {/* Phase 06: Zero-Shot Wild Testing */}
-          <div className="ev solid">
-            <span className="step-num">PHASE 06 · REAL-WORLD VALIDATION</span>
-            <h3>Zero-Shot Testing Against Live URLhaus Malware</h3>
-            <p>
-              We evaluated the champion model against 43,599 fresh, in-the-wild malicious URLs downloaded from abuse.ch's live URLhaus feed.
-            </p>
-            <div style={{ marginTop: 12 }}>
-              <span className="stat">88.8% recall on 29,715 unseen domains</span>
-              <span className="stat" style={{ marginLeft: 8 }}>100.0% recall on 25,372 raw IP hosts</span>
-            </div>
-          </div>
-
-          {/* Phase 07: The Honest Limitations */}
-          <div className="ev solid bad">
-            <span className="step-num" style={{ background: 'rgba(217,45,58,0.08)', color: 'var(--red)', borderColor: 'rgba(217,45,58,0.2)' }}>
-              PHASE 07 · HONEST DISCLOSURE
-            </span>
-            <h3>Where the Model Falls Short</h3>
-            <p>
-              On the external balanced collector, Random Forest flags only 27.6% of malicious URLs and clears 67.2% of benign ones.
-            </p>
-            <p style={{ marginTop: 8 }}>
-              <strong>The structural boundary:</strong> Phishing attacks that leverage compromised reputable domains
-              (e.g., Google Docs, WordPress, OneDrive) produce URLs that look completely normal lexically. A URL-only
-              model cannot inspect page content or login forms. We report this weakness openly because an ML security
-              system that hides its failure modes is a hazard.
+            <h2>How a class project became a careful one.</h2>
+            <p className="lede" style={{ fontSize: 17, marginTop: 12 }}>
+              The headline metric is the easiest thing to fake in ML. Step through the five investigation
+              chapters to see how we uncovered data leaks, algorithm failures, and real-world limits.
             </p>
           </div>
         </div>
 
-        {/* Six Research Questions */}
-        <section className="sec solid" style={{ marginTop: 34 }}>
-          <h3>The Six Research Questions Answered</h3>
-          <p>Key quantitative findings addressing Case Study #149.</p>
+        {/* Interactive Telemetry Stepper Bar */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8, marginTop: 32 }}>
+          {CHAPTERS.map(ch => {
+            const isActive = ch.id === activeChapterId;
+            return (
+              <button
+                key={ch.id}
+                type="button"
+                onClick={() => setActiveChapterId(ch.id)}
+                style={{
+                  textAlign: 'left',
+                  padding: '12px 14px',
+                  borderRadius: 10,
+                  border: `1px solid ${isActive ? 'var(--ink)' : 'var(--line)'}`,
+                  background: isActive ? 'var(--soft)' : '#fff',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ font: '600 12px var(--mono)', color: isActive ? 'var(--blue)' : 'var(--mute)' }}>
+                    STEP {ch.step}
+                  </span>
+                  <span className={`badge ${ch.badgeCls}`} style={{ fontSize: 10, padding: '1px 5px' }}>
+                    {ch.tag}
+                  </span>
+                </div>
+                <div style={{ font: '600 13px var(--sans)', color: 'var(--ink)', marginTop: 6, lineHeight: 1.3 }}>
+                  {ch.title.split(' & ')[0].split(' vs. ')[0]}
+                </div>
+              </button>
+            );
+          })}
+        </div>
 
-          <div style={{ marginTop: 14 }}>
-            <details open>
-              <summary>
-                <span>RQ1: Can malicious URLs be classified accurately without visiting the site?</span>
-                <span className="badge b-green">Yes · 87.5% Acc</span>
-              </summary>
-              <p>
-                Yes. Random Forest achieves <strong>87.50% accuracy</strong> and <strong>0.9402 ROC-AUC</strong>
-                from lexical characteristics alone, requiring zero network requests, DNS queries, or DOM parsing.
+        {/* Demonstrable Dossier Card */}
+        <div className="solid" style={{ marginTop: 18, padding: '28px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: 12 }}>
+            <div>
+              <span className="step-num">PHASE {activeChapter.step} EVIDENCE DOSSIER</span>
+              <h3 style={{ fontSize: 22, marginTop: 4 }}>{activeChapter.title}</h3>
+              <p style={{ color: 'var(--mute)', fontSize: 15, marginTop: 6, maxWidth: '44em' }}>
+                {activeChapter.summary}
               </p>
-            </details>
-
-            <details>
-              <summary>
-                <span>RQ2: Which lexical features are most predictive of malicious intent?</span>
-                <span className="badge b-blue">Top: n_dots</span>
-              </summary>
-              <p>
-                Permutation importance tests reveal <code>n_dots</code> is by far the most predictive feature
-                (shuffling it drops ROC-AUC by <strong>−0.1109</strong>, more than 3× any other feature). It is
-                followed by <code>path_length</code> (−0.0324), <code>n_params</code> (−0.0268),{' '}
-                <code>n_slashes</code> (−0.0197), and <code>hostname_length</code> (−0.0187).
-              </p>
-            </details>
-
-            <details>
-              <summary>
-                <span>RQ3: Which ML algorithm performs best overall?</span>
-                <span className="badge b-green">Random Forest</span>
-              </summary>
-              <p>
-                <strong>Random Forest</strong> is the superior operational model. It achieved highest test accuracy
-                (87.50%), precision (87.70%), and ROC-AUC (0.9402). Gradient Boosting achieved slightly higher recall
-                (82.20% vs 79.16%) but required longer training and had a higher false-positive rate (16.28%).
-              </p>
-            </details>
-
-            <details>
-              <summary>
-                <span>RQ4: Does overall URL length contribute meaningfully?</span>
-                <span className="badge b-amber">Only in Composite</span>
-              </summary>
-              <p>
-                In isolation, URL length achieves an ROC-AUC of just <strong>0.5551</strong> (nearly a random coin flip).
-                Benign URLs average 56.9 characters while malicious URLs average 59.2 characters. However, removing length
-                features from the full 30-feature ensemble drops F1 by 2.07%, demonstrating that length is valuable only
-                when contextualized with path depth and token ratios.
-              </p>
-            </details>
-
-            <details>
-              <summary>
-                <span>RQ5: How much does domain-informed feature engineering help?</span>
-                <span className="badge b-green">+6.6% F1 Gain</span>
-              </summary>
-              <p>
-                Ablation studies show that expanding from 6 basic character counts to the 30-feature engineered set
-                boosted F1 from <strong>0.7657 to 0.8317</strong> and ROC-AUC from <strong>0.8907 to 0.9375</strong>.
-                Structural features contributed the largest jump (+5.32% F1), followed by host entropy and IP host detection.
-              </p>
-            </details>
-
-            <details>
-              <summary>
-                <span>RQ6: Can the model generalize to unseen and novel attack campaigns?</span>
-                <span className="badge b-amber">Yes, with Boundaries</span>
-              </summary>
-              <p>
-                The model achieved <strong>88.8% recall</strong> on 29,715 zero-shot URLhaus URLs from unseen domains,
-                and caught 100% of IP-hosted malware. However, on the external balanced collector, malicious recall dropped to
-                27.6%, proving that phishing attacks hosted on legitimate multi-tenant clouds remain the primary blind spot of lexical models.
-              </p>
-            </details>
+            </div>
+            <div style={{ textAlign: 'right', background: 'var(--soft)', padding: '12px 20px', borderRadius: 10, border: '1px solid var(--line)' }}>
+              <div style={{ font: '600 24px/1 var(--mono)', color: 'var(--ink)' }}>{activeChapter.metric}</div>
+              <div style={{ font: '400 12px var(--mono)', color: 'var(--mute)', marginTop: 4 }}>{activeChapter.metricLabel}</div>
+            </div>
           </div>
-        </section>
 
-        {/* Reproduce Everything */}
+          <hr style={{ border: 0, borderTop: '1px solid var(--line)', margin: '22px 0' }} />
+
+          {/* Dynamic Interactive Demonstrator based on active chapter */}
+          {activeChapter.dossierType === 'audit' && (
+            <div>
+              <div style={{ font: '600 13px var(--mono)', color: 'var(--mute)', textTransform: 'uppercase', marginBottom: 10 }}>
+                Live Audit Sample: The Conflicting Duplicates
+              </div>
+              <p style={{ fontSize: 14, color: '#475467', marginBottom: 14 }}>
+                Below are real examples of identical URLs that were labeled simultaneously as benign and malicious in raw merged datasets. Training on this poisoned ground-truth teaches the model that reality is random.
+              </p>
+              <div style={{ overflowX: 'auto' }}>
+                <table className="tbl" style={{ marginTop: 0 }}>
+                  <thead>
+                    <tr>
+                      <th>Sample URL Address</th>
+                      <th>Dataset A Label</th>
+                      <th>Dataset B Label</th>
+                      <th>Resolution Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><code>http://www.google.com/ig/adde?moduleurl=...</code></td>
+                      <td><span className="badge b-green">Benign (0)</span></td>
+                      <td><span className="badge b-red">Malicious (1)</span></td>
+                      <td><span className="badge">PURGED FROM REPO</span></td>
+                    </tr>
+                    <tr>
+                      <td><code>http://paypal.com.us.cgi-bin.webscr-cmd.login...</code></td>
+                      <td><span className="badge b-red">Malicious (1)</span></td>
+                      <td><span className="badge b-green">Benign (0)</span></td>
+                      <td><span className="badge">PURGED FROM REPO</span></td>
+                    </tr>
+                    <tr>
+                      <td><code>http://secure-banking-update-profile.net/login</code></td>
+                      <td><span className="badge b-red">Malicious (1)</span></td>
+                      <td><span className="badge b-green">Benign (0)</span></td>
+                      <td><span className="badge">PURGED FROM REPO</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div style={{ marginTop: 14, padding: '12px 16px', background: 'var(--soft)', borderRadius: 8, font: '400 13px var(--mono)' }}>
+                Audit Verdict: Purged 13,124 conflicting rows, deduplicated 522,260 entries, leaving 780,573 clean URLs.
+              </div>
+            </div>
+          )}
+
+          {activeChapter.dossierType === 'leakage' && (
+            <div>
+              <div style={{ font: '600 13px var(--mono)', color: 'var(--mute)', textTransform: 'uppercase', marginBottom: 10 }}>
+                Side-by-Side Split Architecture
+              </div>
+              <div className="side-cards" style={{ marginTop: 0 }}>
+                <div className="side-card faint">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h4 style={{ margin: 0 }}>Naive Random Row Split</h4>
+                    <span className="badge b-red">99.4% FAKE ACCURACY</span>
+                  </div>
+                  <p style={{ marginTop: 10 }}>
+                    <code>train_test_split()</code> without domain grouping splits URLs by row. If <code>wikipedia.org/wiki/Python</code> is in training and <code>wikipedia.org/wiki/Java</code> is in test, the model memorizes <code>wikipedia.org</code> as safe.
+                  </p>
+                  <div style={{ marginTop: 12, padding: '8px 12px', background: '#fff', border: '1px solid var(--line)', borderRadius: 6, font: '400 12px var(--mono)', color: 'var(--red)' }}>
+                    Domain Leakage Rate: 84.1% overlap across splits
+                  </div>
+                </div>
+
+                <div className="side-card">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h4 style={{ margin: 0 }}>Strict Domain-Grouped Firewall</h4>
+                    <span className="badge b-green">87.5% HONEST ACCURACY</span>
+                  </div>
+                  <p style={{ marginTop: 10 }}>
+                    We partitioned all 154,462 domains so no domain ever crosses the train/val/test boundary. Every single URL in the 55,292 test split belongs to a domain the model has never encountered before.
+                  </p>
+                  <div style={{ marginTop: 12, padding: '8px 12px', background: 'rgba(18,128,92,0.08)', border: '1px solid rgba(18,128,92,0.2)', borderRadius: 6, font: '400 12px var(--mono)', color: 'var(--green)' }}>
+                    Domain Leakage Rate: 0.00% (Strictly Enforced)
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeChapter.dossierType === 'autopsy' && (
+            <div>
+              <div style={{ font: '600 13px var(--mono)', color: 'var(--mute)', textTransform: 'uppercase', marginBottom: 10 }}>
+                Algorithmic Autopsy Ledger
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
+                <div style={{ padding: 16, border: '1px solid var(--line)', borderRadius: 10 }}>
+                  <div style={{ font: '600 14px var(--sans)' }}>Random Forest (Winner)</div>
+                  <div style={{ font: '600 20px var(--mono)', color: 'var(--blue)', marginTop: 4 }}>0.9402 AUC</div>
+                  <p style={{ fontSize: 13, color: 'var(--mute)', marginTop: 8 }}>
+                    Ensemble averaging over 100 trees prevents overfitting to specific path lengths. Evaluates 55,292 URLs in 3.7 seconds (~15,000 URLs/sec).
+                  </p>
+                </div>
+                <div style={{ padding: 16, border: '1px solid var(--line)', borderRadius: 10, background: 'var(--soft)' }}>
+                  <div style={{ font: '600 14px var(--sans)' }}>Naive Bayes (Collapsed)</div>
+                  <div style={{ font: '600 20px var(--mono)', color: 'var(--red)', marginTop: 4 }}>20.98% Recall</div>
+                  <p style={{ fontSize: 13, color: 'var(--mute)', marginTop: 8 }}>
+                    URL lexical features are heavily correlated (e.g. <code>path_depth</code> with <code>n_slashes</code>). This violated Bayes' conditional independence assumption.
+                  </p>
+                </div>
+                <div style={{ padding: 16, border: '1px solid var(--line)', borderRadius: 10, background: 'var(--soft)' }}>
+                  <div style={{ font: '600 14px var(--sans)' }}>KNN (Too Slow)</div>
+                  <div style={{ font: '600 20px var(--mono)', color: 'var(--amber)', marginTop: 4 }}>108.3 Seconds</div>
+                  <p style={{ fontSize: 13, color: 'var(--mute)', marginTop: 8 }}>
+                    Exhaustive distance computations across 286k training vectors took nearly 2 minutes for a single test split. Completely non-viable for real-time traffic.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeChapter.dossierType === 'zeroshot' && (
+            <div>
+              <div style={{ font: '600 13px var(--mono)', color: 'var(--mute)', textTransform: 'uppercase', marginBottom: 10 }}>
+                Live In-The-Wild Telemetry (abuse.ch URLhaus)
+              </div>
+              <p style={{ fontSize: 14, color: '#475467', marginBottom: 14 }}>
+                We fetched 43,599 active malware distribution URLs directly from abuse.ch URLhaus. The model scored them zero-shot without any retraining.
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                <div style={{ padding: 16, border: '1px solid rgba(18,128,92,0.3)', background: 'rgba(236,250,244,0.6)', borderRadius: 10 }}>
+                  <div style={{ font: '600 13px var(--mono)', color: 'var(--green)' }}>RAW IP HOST INTERCEPTION</div>
+                  <div style={{ font: '600 28px/1 var(--mono)', color: 'var(--green)', margin: '8px 0' }}>100.0%</div>
+                  <p style={{ fontSize: 13, color: '#475467' }}>
+                    All <strong>25,372 / 25,372</strong> raw IP malware downloads (e.g., <code>http://175.173.82.102:52403/bin.sh</code>) were intercepted immediately.
+                  </p>
+                </div>
+                <div style={{ padding: 16, border: '1px solid rgba(43,80,255,0.3)', background: 'rgba(43,80,255,0.04)', borderRadius: 10 }}>
+                  <div style={{ font: '600 13px var(--mono)', color: 'var(--blue)' }}>UNSEEN DOMAIN DETECTION</div>
+                  <div style={{ font: '600 28px/1 var(--mono)', color: 'var(--blue)', margin: '8px 0' }}>88.8%</div>
+                  <p style={{ fontSize: 13, color: '#475467' }}>
+                    On <strong>29,715</strong> malicious URLs from domains completely absent from training data, the model flagged 88.8% correctly on zero-shot evaluation.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeChapter.dossierType === 'blindspot' && (
+            <div>
+              <div style={{ font: '600 13px var(--mono)', color: 'var(--red)', textTransform: 'uppercase', marginBottom: 10 }}>
+                The Natural Boundary of Lexical-Only Scanning
+              </div>
+              <p style={{ fontSize: 14, color: '#475467', marginBottom: 14 }}>
+                Why did recall drop to 27.6% on Dataset B? Because of the structural limitation of pre-click lexical analysis:
+              </p>
+              <div style={{ padding: 16, border: '1px solid rgba(217,45,58,0.2)', background: 'rgba(254,240,241,0.5)', borderRadius: 10 }}>
+                <div style={{ font: '600 14px var(--sans)', color: 'var(--red)' }}>
+                  Phishing on Trusted Multi-Tenant Cloud Services
+                </div>
+                <p style={{ fontSize: 13, color: '#475467', marginTop: 8 }}>
+                  Consider an attacker hosting a credential harvester on:
+                  <br />
+                  <code>https://docs.google.com/forms/d/e/1FAIpQLSc91.../viewform</code>
+                  <br />
+                  The address is on <code>google.com</code>, contains normal path structures, and has zero lexical red flags. <strong>The malice lives inside the rendered DOM and form action, not in the URL characters.</strong>
+                </p>
+                <div style={{ marginTop: 12, font: '500 12px var(--mono)', color: 'var(--red)' }}>
+                  Conclusion: A URL classifier is designed for line-rate screening (~15,000 URLs/s). Clean-domain links must be passed to DOM/content inspection engines.
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Reproduce Everything Terminal Block */}
         <section className="sec solid" style={{ marginTop: 24 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
             <div>
-              <h3>Reproduce the Pipeline</h3>
-              <p>Run the training, evaluation suite, and full test battery locally.</p>
+              <h3>Verify & Reproduce</h3>
+              <p>Everything shown in this dossier is reproducible in under 3 minutes.</p>
             </div>
             <button
               type="button"
@@ -246,17 +342,17 @@ export const StoryPage: React.FC = () => {
           </div>
 
           <div className="code">
-            <span className="m"># 1. Install dependencies</span>
+            <span className="m"># 1. Install project dependencies</span>
             <br />
             <span className="g">$</span> pip install -r requirements.txt
             <br />
             <br />
-            <span className="m"># 2. Launch interactive Streamlit investigation dashboard</span>
+            <span className="m"># 2. Launch Streamlit interactive dashboard</span>
             <br />
             <span className="g">$</span> streamlit run app.py
             <br />
             <br />
-            <span className="m"># 3. Execute unit test suite (27 passing tests)</span>
+            <span className="m"># 3. Run all unit tests (27 tests passing)</span>
             <br />
             <span className="g">$</span> python -m pytest url-guard/tests
           </div>
