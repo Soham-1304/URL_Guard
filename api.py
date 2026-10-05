@@ -34,6 +34,8 @@ if not os.path.exists(MODEL_PATH):
 
 print(f"[*] Loading trained Random Forest champion from: {MODEL_PATH}")
 model = joblib.load(MODEL_PATH)
+import gc
+gc.collect()
 print("[+] Model loaded successfully!")
 
 class PredictionHandler(BaseHTTPRequestHandler):
