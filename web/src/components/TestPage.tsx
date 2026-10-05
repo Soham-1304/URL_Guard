@@ -127,7 +127,7 @@ export const TestPage: React.FC = () => {
       if (res.ok) {
         const json = await res.json();
         setEngineInfo({
-          name: 'Random Forest Champion (100 Trees)',
+          name: 'Random Forest · 100 Trees',
           latencyMs: json.latency_ms || 0.067
         });
         const localSc = score(f);

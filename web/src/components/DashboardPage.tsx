@@ -208,21 +208,25 @@ export const DashboardPage: React.FC = () => {
           </div>
 
           <div style={{ marginTop: 8 }}>
-            {MODELS.map(m => {
-              const val = m[activeKey];
-              const isRf = m.name === 'Random Forest';
-              return (
-                <div key={m.name} className={`bar ${isRf ? 'w' : ''}`}>
-                  <span>
-                    {m.name} {isRf && <span className="badge b-blue" style={{ marginLeft: 6 }}>Champion</span>}
-                  </span>
-                  <div className="t">
-                    <i style={{ width: `${Math.max(0, Math.min(100, val * 100))}%` }} />
+            {(() => {
+              const maxVal = Math.max(...MODELS.map(m => m[activeKey]));
+              return MODELS.map(m => {
+                const val = m[activeKey];
+                const isRf = m.name === 'Random Forest';
+                const isTop = val === maxVal;
+                return (
+                  <div key={m.name} className={`bar ${isTop ? 'w' : ''}`}>
+                    <span>
+                      {m.name} {isRf && <span style={{ color: 'var(--blue)', marginLeft: 4, fontSize: 14 }}>★</span>}
+                    </span>
+                    <div className="t">
+                      <i style={{ width: `${Math.max(0, Math.min(100, val * 100))}%` }} />
+                    </div>
+                    <b>{pct(val)}</b>
                   </div>
-                  <b>{pct(val)}</b>
-                </div>
-              );
-            })}
+                );
+              });
+            })()}
           </div>
 
           {activeFigure === 'models' && (

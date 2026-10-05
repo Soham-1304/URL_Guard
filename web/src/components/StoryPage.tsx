@@ -1,6 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 export const StoryPage: React.FC = () => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    const commands = `pip install -r requirements.txt\nstreamlit run app.py\npython -m pytest url-guard/tests`;
+    navigator.clipboard.writeText(commands);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
   return (
     <main id="p-story" className="on" style={{ paddingBottom: 100 }}>
       <div className="wrap pg">
@@ -84,14 +92,68 @@ export const StoryPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="code" style={{ marginTop: 36 }}>
-          <span className="m"># reproduce everything</span>
-          <br />
-          <span className="g">$</span> pip install -r requirements.txt
-          <br />
-          <span className="g">$</span> streamlit run app.py
-          <br />
-          <span className="g">$</span> python -m pytest url-guard/tests <span className="m"># 27 tests</span>
+        <div style={{ maxWidth: 620, margin: '48px auto 0' }}>
+          <div
+            className="code"
+            style={{
+              position: 'relative',
+              margin: 0,
+              padding: '16px 20px',
+              borderRadius: 12,
+              boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: 12,
+                paddingBottom: 10,
+                borderBottom: '1px solid rgba(255,255,255,0.08)'
+              }}
+            >
+              <span className="m" style={{ font: '500 12px var(--mono)' }}># reproduce everything</span>
+              <button
+                type="button"
+                onClick={handleCopy}
+                style={{
+                  background: copied ? 'rgba(18, 128, 92, 0.25)' : 'rgba(255,255,255,0.08)',
+                  border: `1px solid ${copied ? 'var(--green)' : 'rgba(255,255,255,0.15)'}`,
+                  color: copied ? '#6ee7b7' : '#e7e9ee',
+                  padding: '4px 10px',
+                  borderRadius: 6,
+                  font: '500 11.5px var(--mono)',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                {copied ? (
+                  <>
+                    <span style={{ fontSize: 13, fontWeight: 700 }}>✓</span> Copied
+                  </>
+                ) : (
+                  <>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    Copy
+                  </>
+                )}
+              </button>
+            </div>
+            <div>
+              <span className="g">$</span> pip install -r requirements.txt
+              <br />
+              <span className="g">$</span> streamlit run app.py
+              <br />
+              <span className="g">$</span> python -m pytest url-guard/tests <span className="m"># 27 tests</span>
+            </div>
+          </div>
         </div>
       </div>
     </main>
