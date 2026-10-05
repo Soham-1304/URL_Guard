@@ -21,6 +21,7 @@ Thumbs.db
 
 # Large models & raw data datasets (contains phishing query tokens and exceeds size limits)
 models/random_forest_model.pkl
+models/*.xz
 data/
 
 

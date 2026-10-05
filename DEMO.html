@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>URL-Guard</title>
+<meta name="description" content="Classifying malicious URLs from the address alone. Random Forest, 30 lexical features, 780,573 URLs, domain-grouped evaluation.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#14161b;--mute:#667085;--faint:#d5d9e0;--line:#e4e7ec;--soft:#f5f6f8;--blue:#2b50ff;--red:#d92d3a;--green:#12805c;--amber:#b45309;
+--sans:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;--mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+*{box-sizing:border-box;margin:0}
+body{background:#fff;color:var(--ink);font:400 16px/1.6 var(--sans);-webkit-font-smoothing:antialiased;min-height:100vh}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--blue);outline-offset:3px;border-radius:4px}
+#bg{position:fixed;inset:0;width:100%;height:100%;z-index:0}
+.wrap{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:0 24px}
+nav{position:sticky;top:0;z-index:5;background:rgba(255,255,255,.82);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:62px}
+.logo{font:500 15px var(--mono);text-decoration:none}.logo i{font-style:normal;color:var(--blue)}
+nav ul{display:flex;gap:6px;list-style:none;padding:0}
+nav ul a{display:block;text-decoration:none;font-size:14px;color:var(--mute);padding:7px 13px;border-radius:8px}
+nav ul a:hover{color:var(--ink);background:var(--soft)}nav ul a[aria-current]{color:var(--ink);background:var(--soft);font-weight:500}
+.gh{font-size:14px;font-weight:500;text-decoration:none;border:1px solid var(--line);padding:7px 14px;border-radius:8px;background:#fff}.gh:hover{border-color:var(--ink)}
+main{display:none;padding-bottom:80px}main.on{display:block}
+.solid{background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:14px}
+h1{font-size:clamp(38px,6.4vw,72px);line-height:1.03;letter-spacing:-.04em;font-weight:600;max-width:13em}
+h2{font-size:clamp(26px,3.6vw,36px);letter-spacing:-.03em;line-height:1.12;font-weight:600}
+h3{font-size:17px;font-weight:600;letter-spacing:-.01em}
+.lede{margin-top:22px;max-width:36em;font-size:19px;color:#4b5565}
+.pg{padding-top:56px}.pg>p.lede{margin-bottom:34px}
+.btn{display:inline-block;font:500 15px var(--sans);text-decoration:none;padding:12px 20px;border-radius:10px;border:1px solid var(--ink);background:#fff;cursor:pointer;transition:background .15s}
+.btn.p{background:var(--ink);color:#fff}.btn.p:hover{background:var(--blue);border-color:var(--blue)}.btn:not(.p):hover{background:var(--soft)}
+.cta{margin-top:30px;display:flex;gap:12px;flex-wrap:wrap}
+.hero{padding:96px 0 40px}
+.hint{margin-top:26px;font:400 13px var(--mono);color:var(--mute);display:flex;gap:8px;align-items:center}
+.hint b{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);animation:pl 1.8s infinite}
+@keyframes pl{50%{opacity:.25}}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);margin-top:72px;overflow:hidden}
+.kpis div{padding:26px 24px;border-right:1px solid var(--line)}.kpis div:last-child{border:0}
+.kpis strong{display:block;font:600 34px/1.1 var(--sans);letter-spacing:-.03em}
+.kpis span{font-size:14px;color:var(--mute)}
+.tour{margin-top:28px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.tour a{padding:26px;text-decoration:none;transition:border-color .15s,transform .15s}
+.tour a:hover{border-color:var(--ink)}.tour p{color:var(--mute);font-size:15px;margin-top:6px}.tour em{font:500 14px var(--sans);font-style:normal;color:var(--blue);display:block;margin-top:14px}
+/* dashboard */
+.sec{padding:26px 28px;margin-top:18px}.sec>p{color:var(--mute);font-size:15px;max-width:44em;margin-top:6px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}.grid2 .sec{margin-top:18px}
+.seg{display:flex;flex-wrap:wrap;gap:6px;margin:16px 0 8px}
+.seg button{font:500 13px var(--sans);border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;color:var(--mute)}
+.seg button[aria-pressed=true]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.bar{display:grid;grid-template-columns:150px 1fr 72px;gap:14px;align-items:center;padding:7px 0;font-size:14px}
+.bar .t{height:10px;background:var(--soft);border-radius:5px;overflow:hidden}.bar .t i{display:block;height:100%;background:#aeb4c0;border-radius:5px;transition:width .5s cubic-bezier(.2,.7,.2,1)}
+.bar.w .t i{background:var(--blue)}.bar.w span:first-child{font-weight:600}.bar b{font:500 13px var(--mono);text-align:right}
+.bar.r .t i{background:var(--red)}.bar.g .t i{background:var(--green)}.bar.a .t i{background:var(--amber)}
+.tbl{width:100%;border-collapse:collapse;font-size:14px;margin-top:12px}.tbl td,.tbl th{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line)}.tbl th{font-weight:500;color:var(--mute)}.tbl td:not(:first-child),.tbl th:not(:first-child){text-align:right;font-family:var(--mono);font-size:13px}
+.note{font-size:13.5px;color:var(--mute);margin-top:12px}
+.warn{border-color:#f0d9b5;background:rgba(255,251,243,.95)}
+/* test */
+.tin{display:flex;gap:10px;padding:14px}.tin input{flex:1;min-width:0;font:400 15px var(--mono);padding:13px 14px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+.tin input:focus{outline:2px solid var(--blue);outline-offset:-1px;border-color:transparent}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 18px}.chips button{font:400 12.5px var(--mono);border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;cursor:pointer;color:#475467}.chips button:hover{border-color:var(--ink);color:var(--ink)}
+.res{display:grid;grid-template-columns:300px 1fr;gap:18px;margin-top:18px}
+.verd{padding:26px;text-align:center}.verd .v{font:600 26px var(--sans);letter-spacing:-.02em}.verd .pc{font:600 54px/1.1 var(--sans);letter-spacing:-.04em;margin:6px 0}
+.verd.ok{border-color:#9fd8c2;background:rgba(236,250,244,.96)}.verd.ok .v,.verd.ok .pc{color:var(--green)}
+.verd.bad{border-color:#f0a8ae;background:rgba(254,240,241,.96)}.verd.bad .v,.verd.bad .pc{color:var(--red)}
+.verd p{font-size:13.5px;color:#475467;text-align:left;margin-top:14px}.verd ul{text-align:left;margin:14px 0 0 18px;font-size:14px}
+.fgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:0 28px;margin-top:10px}
+.fg h4{font:500 13px var(--sans);color:var(--mute);margin:14px 0 4px}
+.fr{display:flex;justify-content:space-between;font:400 13px var(--mono);padding:3px 0;border-bottom:1px dashed var(--line)}.fr b{font-weight:500}.fr.hot b{color:var(--red)}
+/* story */
+.tl{position:relative;margin-top:10px;padding-left:34px}.tl:before{content:"";position:absolute;left:8px;top:8px;bottom:8px;width:1px;background:var(--line)}
+.ev{position:relative;padding:22px 26px;margin-bottom:16px}.ev:before{content:"";position:absolute;left:-31px;top:30px;width:11px;height:11px;border-radius:50%;background:#fff;border:2px solid var(--blue)}
+.ev.bad:before{border-color:var(--red)}
+.ev p{color:#475467;margin-top:8px;max-width:46em}.ev code{font:400 13px var(--mono);background:var(--soft);padding:2px 6px;border-radius:5px}
+.ev .stat{display:inline-block;font:500 13px var(--mono);margin-top:12px;padding:4px 10px;border-radius:7px;background:var(--soft)}
+details{border-bottom:1px solid var(--line);padding:14px 0}details summary{cursor:pointer;font-weight:500;list-style:none;display:flex;justify-content:space-between;gap:12px}details summary:after{content:"+";font:400 20px var(--mono);color:var(--mute)}details[open] summary:after{content:"–"}
+details p{color:#475467;margin-top:10px;font-size:15px;max-width:48em}
+.code{background:var(--ink);color:#e7e9ee;border-radius:12px;padding:20px 24px;font:400 13.5px/1.7 var(--mono);overflow-x:auto;margin-top:16px;white-space:pre}.code .m{color:#8b92a0}.code .g{color:#7ee0b5}
+footer{position:relative;z-index:1;background:rgba(255,255,255,.94);border-top:1px solid var(--line);padding:24px 0 36px;font-size:14px;color:var(--mute)}
+footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}footer a{color:var(--ink)}
+@media(max-width:860px){.kpis,.tour,.grid2,.res,.fgrid{grid-template-columns:1fr}.kpis div{border-right:0;border-bottom:1px solid var(--line)}nav ul a{padding:7px 9px}.gh{display:none}.bar{grid-template-columns:110px 1fr 64px}}
+@media(max-width:520px){.tin{flex-direction:column}.hero{padding-top:56px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<canvas id="bg" aria-hidden="true"></canvas>
+<nav aria-label="Main"><div class="wrap">
+  <a class="logo" href="#/">▮ url-guard</a>
+  <ul id="nav"><li><a href="#/">Overview</a></li><li><a href="#/dashboard">Dashboard</a></li><li><a href="#/test">Try it</a></li><li><a href="#/story">Story</a></li></ul>
+  <a class="gh" href="https://github.com/Soham-1304/URL_Guard" target="_blank" rel="noopener">GitHub</a>
+</div></nav>
+
+<main id="p-home" class="on"><div class="wrap">
+  <section class="hero">
+    <h1>A malicious link gives itself away in its own spelling.</h1>
+    <p class="lede">URL-Guard reads only the address (dots, depth, hosts, keywords) and returns a verdict in 0.12 ms. It never visits the page and never makes a network call.</p>
+    <div class="cta"><a class="btn p" href="#/test">Test a URL</a><a class="btn" href="#/dashboard">See the evidence</a></div>
+    <p class="hint"><b></b>Move your cursor over the background. Every line is a synthetic URL, scored live in your browser.</p>
+  </section>
+  <div class="kpis solid">
+    <div><strong>87.5%</strong><span>test accuracy, domain-grouped</span></div>
+    <div><strong>0.9402</strong><span>ROC-AUC, Random Forest</span></div>
+    <div><strong>88.3%</strong><span>recall on fresh URLhaus malware</span></div>
+    <div><strong>780,573</strong><span>deduplicated training URLs</span></div>
+  </div>
+  <div class="tour">
+    <a class="solid" href="#/dashboard"><h3>Dashboard</h3><p>Six models, ablations, feature importance and detection by attack type, all from the real result tables.</p><em>Open dashboard</em></a>
+    <a class="solid" href="#/test"><h3>Try it</h3><p>Paste any URL and watch all 30 features get extracted, then see which ones drove the verdict.</p><em>Test a URL</em></a>
+    <a class="solid" href="#/story"><h3>The story</h3><p>The leaky datasets, the honest splits, and the weak spot we found and kept in the report.</p><em>Read the story</em></a>
+  </div>
+</div></main>
+
+<main id="p-dashboard"><div class="wrap pg">
+  <h2>Every number, from the result tables.</h2>
+  <p class="lede" style="font-size:17px">All six models were scored on the same domain-grouped test split of 55,292 URLs, so no domain appears in both training and test.</p>
+  <div class="kpis solid" style="margin-top:0">
+    <div><strong>87.70%</strong><span>precision, the highest of six</span></div>
+    <div><strong>7.1%</strong><span>benign URLs wrongly flagged</span></div>
+    <div><strong>100%</strong><span>of 25,372 IP-hosted malware caught</span></div>
+    <div><strong>0.12 ms</strong><span>per URL to score</span></div>
+  </div>
+  <section class="sec solid"><h3>Model comparison</h3><p>Pick a metric. Bars start at zero, so gaps are not exaggerated.</p>
+    <div class="seg" id="mseg"></div><div id="mbars"></div></section>
+  <div class="grid2">
+    <section class="sec solid"><h3>Detection by attack type</h3><p>Random Forest, share of URLs flagged malicious on the test set.</p><div id="sub"></div></section>
+    <section class="sec solid"><h3>Most predictive features</h3><p>Drop in test ROC-AUC when a feature is shuffled.</p><div id="imp"></div></section>
+  </div>
+  <section class="sec solid"><h3>What feature engineering bought</h3><p>Random Forest F1 as feature groups were added. Axis starts at 0.70.</p><div id="abl"></div>
+    <p class="note">Length alone scores ROC-AUC 0.5551, close to a coin flip. Removing the length group from the full set costs 2.07% F1, so it only helps in combination.</p></section>
+  <section class="sec solid"><h3>Datasets and leakage protection</h3>
+    <div style="overflow-x:auto"><table class="tbl"><tr><th>Split</th><th>Rows</th><th>Domains</th><th>% malicious</th></tr>
+    <tr><td>Train</td><td>286,919</td><td>110,271</td><td>39.3%</td></tr><tr><td>Validation</td><td>57,538</td><td>22,130</td><td>39.0%</td></tr><tr><td>Test</td><td>55,292</td><td>22,061</td><td>38.9%</td></tr>
+    <tr><td>External malicious</td><td>85,835</td><td>44,087</td><td>100%</td></tr><tr><td>External benign</td><td>4,190</td><td>3,862</td><td>0%</td></tr><tr><td>URLhaus fresh feed</td><td>43,599</td><td>17,030</td><td>100%</td></tr></table></div></section>
+  <section class="sec solid warn"><h3>Where it struggles</h3><p>On the external collector, Random Forest flags only 27.6% of malicious URLs and clears 67.2% of benign ones. Phishing is caught 74.7% of the time on the test split, below malware at 87.0%. We report this because a model that only shows its best number can't be trusted. The <a href="#/story">story page</a> explains why this happens.</p></section>
+</div></main>
+
+<main id="p-test"><div class="wrap pg">
+  <h2>Paste a URL. Watch it get read.</h2>
+  <p class="lede" style="font-size:17px">The 30 features below are computed by a JavaScript port of the project's extractor. The verdict comes from a transparent preview scorer, because the trained forest runs in Python.</p>
+  <form class="tin solid" id="form"><input id="inp" aria-label="URL to scan" placeholder="http://paypal-verification-account-security.com/login.php?update=true" autocomplete="off" spellcheck="false"><button class="btn p" type="submit">Analyze</button></form>
+  <div class="chips" id="chips"></div>
+  <div class="res" id="res"></div>
+  <p class="note">For the real Random Forest verdict, run <code>streamlit run app.py</code> from the repo. The preview scorer here is a hand-weighted rule set over the same features and will disagree with the model on edge cases.</p>
+</div></main>
+
+<main id="p-story"><div class="wrap pg">
+  <h2>How a class project became a careful one.</h2>
+  <p class="lede" style="font-size:17px">The headline accuracy is the least interesting part. The decisions behind it are what make it believable.</p>
+  <div class="tl">
+    <div class="ev solid"><h3>The problem</h3><p>Blocklists only know URLs someone already reported, and opening a suspicious link to inspect it is the risk itself. The goal: decide from the string alone, before anyone clicks.</p></div>
+    <div class="ev solid"><h3>The data was lying</h3><p>Merging the Kaggle collectors, 522,260 URLs turned out to be identical across two files. We deduplicated them and dropped 13,124 URLs labeled both benign and malicious.</p><span class="stat">84.6% overlap · 13,124 label conflicts</span></div>
+    <div class="ev solid"><h3>The model could guess the source</h3><p>A forest could predict which collector a URL came from far above chance, a sign it would learn the collector instead of the threat. So training uses one source only, and the others are held out for testing.</p><span class="stat">source-bias gap 0.447</span></div>
+    <div class="ev solid"><h3>Splits by domain, not by row</h3><p>Related URLs from one domain leak across a random split and inflate scores. Train, validation and test share no domains, with at most 50 URLs per domain.</p></div>
+    <div class="ev solid"><h3>Six algorithms, one honest comparison</h3><p>Random Forest won on accuracy, precision and AUC. KNN needed 108 seconds just to score the test set. Naive Bayes collapsed to 21% recall because URL features are strongly correlated, which breaks its independence assumption.</p><span class="stat">Random Forest · 0.9402 ROC-AUC</span></div>
+    <div class="ev solid"><h3>What the model actually looks at</h3><p>The dot count dominates: shuffling it costs about 0.11 ROC-AUC, more than three times any other feature. Malicious URLs lean on subdomains, dotted IPs and file extensions.</p></div>
+    <div class="ev solid"><h3>Fresh malware it had never seen</h3><p>On 29,715 URLhaus URLs from unseen domains, it flagged 88.8%. Every one of the 25,372 raw-IP URLs was caught.</p><span class="stat">88.8% zero-shot · 100% IP hosts</span></div>
+    <div class="ev solid bad"><h3>Where it falls short</h3><p>On the external balanced collector, only 27.6% of malicious URLs are flagged and 67.2% of benign ones cleared. A URL-only model also cannot catch a clean-looking URL on a hacked legitimate site. Phishing, which imitates normal addresses, is the hardest class.</p><span class="stat">27.6% recall · 67.2% specificity on external set</span></div>
+  </div>
+  <section class="sec solid" style="margin-top:34px"><h3>The six research questions</h3>
+    <details><summary>Can malicious URLs be classified without visiting the site?</summary><p>Yes. 87.50% accuracy and 0.9402 ROC-AUC from the string alone, with no network request, DNS query or page content.</p></details>
+    <details><summary>Which features are most predictive?</summary><p>n_dots first, then path_length, n_params, n_slashes, hostname_length and n_subdomains, by permutation importance.</p></details>
+    <details><summary>Which algorithm performs best?</summary><p>Random Forest, with the best accuracy, precision and ROC-AUC. Gradient Boosting has the best recall.</p></details>
+    <details><summary>Does URL length contribute?</summary><p>Only alongside other features. Alone it reaches 0.5551 ROC-AUC. Benign URLs average 56.9 characters and malicious ones 59.2.</p></details>
+    <details><summary>How does feature engineering help?</summary><p>F1 rose from 0.7657 to 0.8317 and ROC-AUC from 0.8907 to 0.9375 as structural, host, keyword and brand features were added.</p></details>
+    <details><summary>Can it classify unseen URLs?</summary><p>Yes, with limits: 88.8% on unseen URLhaus domains, but weaker on the external balanced collector.</p></details></section>
+  <div class="code"><span class="m"># reproduce everything</span>
+<span class="g">$</span> pip install -r requirements.txt
+<span class="g">$</span> streamlit run app.py
+<span class="g">$</span> python -m pytest url-guard/tests   <span class="m"># 27 tests</span></div>
+</div></main>
+
+<footer><div class="wrap"><span>URL-Guard · B.Tech CSE 2024–2028 · Semester V · Machine Learning Case Study 149</span><a href="https://github.com/Soham-1304/URL_Guard" target="_blank" rel="noopener">github.com/Soham-1304/URL_Guard</a></div></footer>
+
+<script>
+const $=s=>document.querySelector(s),pct=v=>(v*100).toFixed(2)+"%";
+/* ---- port of url-guard/src/features.py ---- */
+const KW="login signin sign-in verify verification secure account update confirm banking password passwd wallet webscr billing invoice support unlock suspend recover authenticate free bonus prize gift crypto airdrop".split(" ");
+const SHORT=new Set("bit.ly tinyurl.com t.co goo.gl ow.ly is.gd buff.ly rebrand.ly cutt.ly shorturl.at tiny.cc rb.gy t.ly".split(" "));
+const RISKY=new Set("zip mov xyz top tk ml ga cf gq click country work support rest icu cyou buzz monster sbs cfd".split(" "));
+const BRANDS="google facebook paypal amazon apple microsoft netflix instagram whatsapp linkedin twitter youtube github dropbox adobe ebay walmart chase wellsfargo bankofamerica citibank hdfcbank icicibank sbi paytm phonepe flipkart outlook office365 yahoo spotify steam binance coinbase metamask dhl fedex ups usps irs".split(" ");
+const GROUPS={"Length":["url_length","hostname_length","path_length","query_length","longest_token_len"],"Counts":["n_dots","n_hyphens","n_slashes","n_digits","n_special","n_params","n_pct_encoded","n_at","path_depth","n_subdomains","keyword_count"],"Ratios":["digit_ratio","letter_ratio","special_ratio"],"Host":["has_ip_host","has_port","has_punycode","is_shortener","risky_tld","host_entropy","domain_digit_count","domain_hyphen_count"],"Brand":["min_brand_dist","brand_in_subdomain","brand_in_path"]};
+function lev(a,b,cap=4){if(a===b)return 0;if(Math.abs(a.length-b.length)>cap)return cap+1;let p=Array.from({length:b.length+1},(_,i)=>i);for(let i=1;i<=a.length;i++){const c=[i];for(let j=1;j<=b.length;j++)c.push(Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]!==b[j-1]?1:0)));if(Math.min(...c)>cap)return cap+1;p=c}return p[b.length]}
+function ent(s){if(!s)return 0;const m={};for(const c of s)m[c]=(m[c]||0)+1;return -Object.values(m).reduce((a,v)=>a+v/s.length*Math.log2(v/s.length),0)}
+function feats(raw){
+  raw=(raw||"").trim();if(!raw)return null;
+  const u=/^[a-z][a-z0-9+.\-]*:\/\//i.test(raw)?raw:"http://"+raw.replace(/^\/+/,"");
+  let P;try{P=new URL(u)}catch{return null}
+  const host=P.hostname.toLowerCase().replace(/^\[|\]$/g,"");if(!host)return null;
+  const nos=u.split("://")[1],m=nos.match(/^([^\/?#]*)([^?#]*)(?:\?([^#]*))?/),path=m[2]||"",query=m[3]||"";
+  let dec=nos;try{dec=decodeURIComponent(nos)}catch{}dec=dec.toLowerCase();
+  const ip=/^(\d{1,3}\.){3}\d{1,3}$/.test(host)||/^0x[0-9a-f]+$/i.test(host)||/^\d{8,10}$/.test(host)||host.includes(":");
+  const L=host.split("."),two=L.length>=3&&L[L.length-1].length===2&&["co","com","org","net","gov","ac","edu"].includes(L[L.length-2]),sl=two?2:1;
+  const domain=ip?"":(L[L.length-sl-1]||""),suffix=L.slice(L.length-sl).join(".");
+  let sub=ip?[]:L.slice(0,Math.max(0,L.length-sl-1));if(sub[0]==="www")sub=sub.slice(1);
+  const reg=ip?host:[domain,suffix].filter(Boolean).join(".");
+  const n=nos.length,dg=(nos.match(/\d/g)||[]).length,lt=(nos.match(/[a-z]/gi)||[]).length,sp=n-dg-lt,tk=nos.split(/[^a-zA-Z0-9]+/).filter(Boolean);
+  const bd=domain&&!ip?Math.min(...BRANDS.map(b=>lev(domain,b))):5,st=sub.join(".").toLowerCase(),pt=(path+"?"+query).toLowerCase();
+  const port=P.port===""?null:+P.port;
+  return{url_length:n,hostname_length:host.length,path_length:path.length,query_length:query.length,longest_token_len:Math.max(0,...tk.map(t=>t.length)),
+    n_dots:(nos.match(/\./g)||[]).length,n_hyphens:(nos.match(/-/g)||[]).length,n_slashes:(nos.match(/\//g)||[]).length,n_digits:dg,n_special:sp,
+    n_params:query.split("&").filter(Boolean).length,n_pct_encoded:(nos.match(/%[0-9a-f]{2}/gi)||[]).length,n_at:(nos.match(/@/g)||[]).length,
+    path_depth:path.split("/").filter(Boolean).length,n_subdomains:ip?0:sub.length,keyword_count:KW.reduce((a,k)=>a+dec.split(k).length-1,0),
+    digit_ratio:+(dg/n).toFixed(3),letter_ratio:+(lt/n).toFixed(3),special_ratio:+(sp/n).toFixed(3),
+    has_ip_host:+ip,has_port:+(port!==null&&port!==80&&port!==443),has_punycode:+host.includes("xn--"),is_shortener:+SHORT.has(reg),
+    risky_tld:+RISKY.has(suffix.split(".").pop()),host_entropy:+ent(host).toFixed(2),domain_digit_count:(domain.match(/\d/g)||[]).length,domain_hyphen_count:(domain.match(/-/g)||[]).length,
+    min_brand_dist:bd,brand_in_subdomain:+BRANDS.some(b=>st.includes(b)&&b!==domain),brand_in_path:+BRANDS.some(b=>pt.includes(b)&&b!==domain)};
+}
+/* preview scorer: transparent hand-weighted rules over the real features (NOT the trained forest) */
+function score(f){
+  let s=-1.8;const w=[],add=(v,t)=>{if(v>0){s+=v;w.push([v,t])}};
+  add(f.has_ip_host*3,"IP address used as host");add(f.has_port*1,"non-standard port");
+  add(Math.max(0,f.n_dots-2)*.45,f.n_dots+" dots");add(Math.min(f.n_subdomains,4)*.35*(f.n_subdomains>1),f.n_subdomains+" subdomains");
+  add(Math.min(f.keyword_count,4)*.55,f.keyword_count+" suspicious keyword"+(f.keyword_count>1?"s":""));
+  add(f.risky_tld*1.3,"risky top-level domain");add(f.domain_hyphen_count*.3,f.domain_hyphen_count+" hyphens in domain");
+  add(Math.min(f.domain_digit_count,3)*.15,"digits inside domain name");add(f.brand_in_subdomain*1.6,"brand name used as a subdomain");add(f.brand_in_path*.9,"brand name in path");
+  add(f.min_brand_dist>0&&f.min_brand_dist<=2?1:0,"domain close to a known brand");add(f.n_at*1.5,"@ symbol");add(f.is_shortener*.8,"link shortener");add(f.has_punycode,"punycode host");
+  add(f.n_params*.35,f.n_params+" query parameter"+(f.n_params>1?"s":""));add(Math.max(0,f.path_length-40)*.02,"long path");add(Math.min(f.n_pct_encoded,5)*.2,"percent-encoded characters");add(f.host_entropy>3.8?.5:0,"high-entropy host");
+  return{p:1/(1+Math.exp(-s)),why:w.sort((a,b)=>b[0]-a[0]).map(x=>x[1])};
+}
+/* ---- ASCII URL field ---- */
+const cv=$("#bg"),cx=cv.getContext("2d"),reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const R=a=>a[Math.random()*a.length|0],rs=n=>Array.from({length:n},()=>"abcdefghijklmnopqrstuvwxyz0123456789"[Math.random()*36|0]).join("");
+const GOOD=["wikipedia.org/wiki/","github.com/","docs.python.org/3/library/","stackoverflow.com/questions/","nytimes.com/2026/","developer.mozilla.org/en-US/docs/","arxiv.org/abs/","youtube.com/watch?v=","en.wikipedia.org/wiki/","medium.com/@","kaggle.com/datasets/","scikit-learn.org/stable/modules/"];
+const mkGood=()=>"https://"+R(["www.",""])+R(GOOD)+R(["Random_forest","pandas","2504."+rs(5),"ensemble","machine-learning",rs(8),"Phishing","index.html"]);
+const mkBad=()=>{const k=Math.random()*5|0,b=R(["paypal","google","amazon","netflix","hdfcbank","microsoft"]),w=R(["login","verify","secure","account","update","signin"]);
+  return k===0?`http://${rs(3)}.${rs(3)}.${rs(2)}.${rs(2)}:${rs(0)||(1000+Math.random()*60000|0)}/${R(["bin.sh","mirai.x86","a.exe","payload"])}`.replace(/[a-z]/g,()=>Math.random()*255|0)
+   :k===1?`http://${b}-${w}-${R(["account","security","alert"])}.${R(["xyz","top","click","tk"])}/${w}.php?${R(["id","session","token"])}=${rs(8)}`
+   :k===2?`http://${w}.${b}.${rs(6)}.${R(["com","net","icu"])}/${w}/${rs(5)}?ref=${rs(6)}&u=${rs(4)}`
+   :k===3?`http://${b.replace(/o/g,"0").replace(/l/g,"1")}-${w}.${R(["xyz","top","work"])}/${w}-identity`
+   :`http://free-${R(["gift","bonus","prize","crypto"])}-${rs(4)}.${R(["top","click","buzz"])}/a/b/c/${rs(3)}.php?x=${rs(4)}&y=${rs(4)}&z=${rs(3)}`};
+let rows=[],W,H,cw,LH=21,mx=-1,my=-1,last=0;
+function mkRow(i){const segs=[];let s="",len=0;const target=Math.ceil(W/cw)*1.6+40;
+  while(len<target){const url=Math.random()<.5?mkGood():mkBad(),f=feats(url),sc=f?score(f):{p:.5};segs.push({a:s.length,b:s.length+url.length,url,p:sc.p});s+=url+"   ";len=s.length}
+  return{s,segs,L:s.length,off:Math.random()*s.length*cw,v:(8+Math.random()*20)*(i%2?1:-1)}}
+function size(){const d=devicePixelRatio||1;W=innerWidth;H=innerHeight;cv.width=W*d;cv.height=H*d;cx.setTransform(d,0,0,d,0,0);cx.font='400 13px "Geist Mono",ui-monospace,Menlo,monospace';cw=cx.measureText("M").width;rows=Array.from({length:Math.ceil(H/LH)+1},(_,i)=>mkRow(i))}
+function draw(t){
+  const dt=Math.min(.05,(t-last)/1000||0);last=t;cx.clearRect(0,0,W,H);cx.font='400 13px "Geist Mono",ui-monospace,Menlo,monospace';cx.textBaseline="middle";
+  const hr=my>=0?Math.floor(my/LH):-9;let tag=null;
+  rows.forEach((r,i)=>{if(!reduce)r.off=(r.off+r.v*dt+r.L*cw*4)%(r.L*cw);
+    const P=r.L*cw,x0=-r.off,y=i*LH+LH/2,near=Math.abs(i-hr);
+    cx.fillStyle=near===0?"rgba(20,22,27,.16)":near===1?"rgba(20,22,27,.12)":"rgba(95,106,125,.105)";
+    cx.fillText(r.s,x0,y);cx.fillText(r.s,x0+P,y);
+    if(near===0){let ci=((mx-x0)/cw)|0;ci=((ci%r.L)+r.L)%r.L;const sg=r.segs.find(g=>ci>=g.a&&ci<g.b);
+      if(sg){const bad=sg.p>=.5,col=bad?"217,45,58":"18,128,92";
+        [x0,x0+P].forEach(bx=>{const x=bx+sg.a*cw;if(x+sg.url.length*cw>0&&x<W){cx.fillStyle=`rgba(${col},.1)`;cx.fillRect(x-3,y-LH/2+1,sg.url.length*cw+6,LH-2);cx.fillStyle=`rgb(${col})`;cx.fillText(sg.url,x,y)}});
+        tag={t:(bad?"malicious ":"benign ")+Math.round(sg.p*100)+"%",col}}}});
+  if(tag){cx.font='500 12px "Geist Mono",monospace';const tw=cx.measureText(tag.t).width+18,tx=Math.min(mx+14,W-tw-8),ty=Math.min(my+16,H-30);
+    cx.fillStyle="#fff";cx.strokeStyle=`rgb(${tag.col})`;cx.beginPath();cx.roundRect(tx,ty,tw,24,7);cx.fill();cx.stroke();cx.fillStyle=`rgb(${tag.col})`;cx.fillText(tag.t,tx+9,ty+12.5)}
+  requestAnimationFrame(draw)}
+addEventListener("pointermove",e=>{if(e.target.closest(".solid,nav,.btn,input,button,.tin,details,.code,footer,.chips")){mx=my=-1}else{mx=e.clientX;my=e.clientY}});
+document.addEventListener("pointerleave",()=>{mx=my=-1});
+let rz;addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(size,200)});
+(document.fonts&&document.fonts.ready||Promise.resolve()).then(()=>{size();requestAnimationFrame(draw)});
+/* ---- dashboard ---- */
+const M=[["Random Forest",.875,.877,.7916,.8321,.9402,.8828],["Gradient Boosting",.8678,.8372,.822,.8295,.9319,.9045],["KNN",.8585,.8501,.7751,.8109,.9192,.8945],["Decision Tree",.8506,.8077,.8116,.8097,.8949,.9039],["Logistic Regression",.7948,.723,.771,.7462,.8663,.9073],["Naive Bayes",.6726,.8191,.2098,.334,.7434,.8721]];
+const MN=["Accuracy","Precision","Recall","F1","ROC-AUC","URLhaus recall"];let mi=4;
+function bars(el,data,fmt,cls=""){$(el).innerHTML=data.map(d=>`<div class="bar ${d.c||cls}"><span>${d.n}</span><div class="t"><i style="width:${Math.max(0,Math.min(100,d.w))}%"></i></div><b>${fmt(d.v)}</b></div>`).join("")}
+function drawM(){$("#mseg").innerHTML=MN.map((n,i)=>`<button aria-pressed="${i===mi}" data-i="${i}">${n}</button>`).join("");
+  bars("#mbars",M.map((r,i)=>({n:r[0],v:r[mi+1],w:r[mi+1]*100,c:r[0]==="Random Forest"?"w":""})),pct)}
+$("#mseg").addEventListener("click",e=>{const b=e.target.closest("button");if(b){mi=+b.dataset.i;drawM()}});drawM();
+bars("#sub",[["Malware",.8696,"g"],["Defacement",.8222,"g"],["Phishing",.7474,"a"],["Benign (false alarms)",.0714,"r"]].map(a=>({n:a[0],v:a[1],w:a[1]*100,c:a[2]})),pct);
+bars("#imp",[["n_dots",.11],["path_length",.033],["n_params",.027],["n_slashes",.02],["hostname_length",.019],["n_subdomains",.018]].map(a=>({n:a[0],v:a[1],w:a[1]/.11*100,c:a[0]==="n_dots"?"w":""})),v=>"−"+v.toFixed(3));
+bars("#abl",[["Raw length + counts (6)",.7657],["+ structure (18)",.8189],["+ host signals (26)",.8279],["+ keywords (27)",.828],["+ brand typosquat (30)",.8317]].map((a,i)=>({n:a[0],v:a[1],w:(a[1]-.7)/.2*100,c:i===4?"w":""})),v=>v.toFixed(4));
+/* ---- test page ---- */
+const PRE=[["Google search","https://www.google.com/search?q=machine+learning+research"],["Wikipedia","https://en.wikipedia.org/wiki/Random_forest"],["Fake PayPal","http://paypal-verification-account-security.com/login.php?update=true"],["Raw IP malware","http://175.173.82.102:52403/bin.sh"],["Google lookalike","http://g00gle-security-alert.xyz/verify-identity"],["Bank login lure","https://secure-banking-login-auth.net/portal/signin?ref=account"]];
+$("#chips").innerHTML=PRE.map((p,i)=>`<button data-i="${i}">${p[0]}</button>`).join("");
+function analyze(raw){const f=feats(raw);
+  if(!f){$("#res").innerHTML=`<div class="sec solid" style="grid-column:1/-1;margin:0"><h3>That doesn't look like a URL</h3><p>Enter a host and optional path, for example <code>example.com/login?id=1</code>.</p></div>`;return}
+  const s=score(f),bad=s.p>=.5,hot=new Set(["has_ip_host","has_port","risky_tld","brand_in_subdomain","brand_in_path","has_punycode","is_shortener","n_at"]);
+  $("#res").innerHTML=`<div class="verd solid ${bad?"bad":"ok"}"><div class="v">${bad?"Malicious":"Benign"}</div><div class="pc">${Math.round(s.p*100)}%</div><div style="font-size:13px;color:#475467">preview probability</div>
+    ${s.why.length?`<ul>${s.why.slice(0,5).map(x=>`<li>${x}</li>`).join("")}</ul>`:`<p>No structural red flags found.</p>`}</div>
+    <div class="sec solid" style="margin:0"><h3>30 features extracted</h3><div class="fgrid">${Object.entries(GROUPS).map(([g,ks])=>`<div class="fg"><h4>${g}</h4>${ks.map(k=>`<div class="fr ${hot.has(k)&&f[k]?"hot":""}"><span>${k}</span><b>${f[k]}</b></div>`).join("")}</div>`).join("")}</div></div>`}
+$("#form").addEventListener("submit",e=>{e.preventDefault();analyze($("#inp").value)});
+$("#chips").addEventListener("click",e=>{const b=e.target.closest("button");if(b){$("#inp").value=PRE[+b.dataset.i][1];analyze($("#inp").value)}});
+analyze(PRE[2][1]);$("#inp").value=PRE[2][1];
+/* ---- router ---- */
+const ROUTES={"/":"home","/dashboard":"dashboard","/test":"test","/story":"story"};
+function route(){const r=location.hash.replace(/^#/,"")||"/",k=ROUTES[r]||"home";
+  document.querySelectorAll("main").forEach(m=>m.classList.toggle("on",m.id==="p-"+k));
+  document.querySelectorAll("#nav a").forEach(a=>a.getAttribute("href")==="#"+(r in ROUTES?r:"/")?a.setAttribute("aria-current","page"):a.removeAttribute("aria-current"));
+  document.title=(k==="home"?"URL-Guard":"URL-Guard · "+{dashboard:"Dashboard",test:"Try it",story:"Story"}[k]);scrollTo(0,0)}
+addEventListener("hashchange",route);route();
+</script>
+</body>
+</html>
