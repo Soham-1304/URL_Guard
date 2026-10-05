@@ -1,0 +1,7 @@
+set,rows,domains,malicious_%,domain_seen_in_train_%
+train,286919,110271,39.3,
+val,57538,22130,39.0,
+test,55292,22061,38.9,
+balanced_malicious,85835,44087,100.0,8.5
+balanced_benign,4190,3862,0.0,18.4
+urlhaus,43599,17030,100.0,1.0

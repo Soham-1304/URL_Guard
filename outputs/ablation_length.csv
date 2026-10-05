@@ -1,0 +1,7 @@
+feature_set,n_features,model,test_f1,test_roc_auc,recall_urlhaus,recall_balanced_malicious,specificity_balanced_benign
+url_length only,1,Logistic Regression,0.4728,0.5173,0.9153,0.5485,0.0379
+url_length only,1,Random Forest,0.4756,0.5551,0.8181,0.4937,0.4189
+all features minus length group,25,Logistic Regression,0.705,0.8445,0.9241,0.4174,0.5976
+all features minus length group,25,Random Forest,0.811,0.9266,0.8871,0.2958,0.6792
+all features,30,Logistic Regression,0.7466,0.8662,0.9108,0.4232,0.4387
+all features,30,Random Forest,0.8317,0.9375,0.8813,0.2772,0.6728

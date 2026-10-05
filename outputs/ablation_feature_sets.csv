@@ -1,0 +1,11 @@
+feature_set,n_features,model,test_f1,test_roc_auc,recall_urlhaus,recall_balanced_malicious,specificity_balanced_benign
+1 baseline: raw length + char counts,6,Logistic Regression,0.6644,0.7782,0.9372,0.3794,0.1095
+1 baseline: raw length + char counts,6,Random Forest,0.7657,0.8907,0.8902,0.354,0.6251
+"2 + structure (host/path/query, ratios)",18,Logistic Regression,0.7308,0.8559,0.9006,0.4342,0.473
+"2 + structure (host/path/query, ratios)",18,Random Forest,0.8189,0.9314,0.8816,0.3156,0.6105
+"3 + host signals (IP, port, TLD, entropy)",26,Logistic Regression,0.7399,0.86,0.9109,0.4402,0.468
+"3 + host signals (IP, port, TLD, entropy)",26,Random Forest,0.8279,0.9349,0.881,0.2896,0.6601
+4 + suspicious keywords,27,Logistic Regression,0.745,0.863,0.9096,0.4296,0.4208
+4 + suspicious keywords,27,Random Forest,0.828,0.9358,0.8835,0.2858,0.6699
+5 + brand/typosquat (full),30,Logistic Regression,0.7466,0.8662,0.9108,0.4232,0.4387
+5 + brand/typosquat (full),30,Random Forest,0.8317,0.9375,0.8813,0.2772,0.6728

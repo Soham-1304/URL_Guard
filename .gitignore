@@ -1,0 +1,30 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Caches and virtual environments
+.pytest_cache/
+.venv/
+venv/
+ENV/
+env/
+
+# OS artifacts
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Large models & raw data datasets (contains phishing query tokens and exceeds size limits)
+models/random_forest_model.pkl
+data/
+
+
+# Node & Frontend Build
+web/node_modules/
+web/dist/
+

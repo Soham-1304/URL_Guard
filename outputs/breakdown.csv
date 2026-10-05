@@ -1,0 +1,73 @@
+model,eval_set,by,group,n,flagged_malicious_rate
+Logistic Regression,test,subtype,benign,18258,0.18994413407821228
+Logistic Regression,test,subtype,defacement,4836,0.8738626964433416
+Logistic Regression,test,subtype,malware,1288,0.9037267080745341
+Logistic Regression,test,subtype,phishing,5618,0.6520113919544321
+Logistic Regression,balanced_malicious,domain_seen_in_train,domain seen in training,2510,0.3286852589641434
+Logistic Regression,balanced_malicious,domain_seen_in_train,unseen domain,27490,0.4335758457620953
+Logistic Regression,balanced_benign,domain_seen_in_train,domain seen in training,770,0.6181818181818182
+Logistic Regression,balanced_benign,domain_seen_in_train,unseen domain,3420,0.5508771929824562
+Logistic Regression,urlhaus,has_ip_host,IP-address host,25372,1.0
+Logistic Regression,urlhaus,has_ip_host,domain host,4628,0.398876404494382
+Logistic Regression,urlhaus,domain_seen_in_train,domain seen in training,285,0.6842105263157895
+Logistic Regression,urlhaus,domain_seen_in_train,unseen domain,29715,0.9094060238936564
+Naive Bayes,test,subtype,benign,18258,0.0297951582867784
+Naive Bayes,test,subtype,defacement,4836,0.22663358147229115
+Naive Bayes,test,subtype,malware,1288,0.7849378881987578
+Naive Bayes,test,subtype,phishing,5618,0.06336774652901389
+Naive Bayes,balanced_malicious,domain_seen_in_train,domain seen in training,2510,0.12390438247011952
+Naive Bayes,balanced_malicious,domain_seen_in_train,unseen domain,27490,0.16387777373590395
+Naive Bayes,balanced_benign,domain_seen_in_train,domain seen in training,770,0.011688311688311689
+Naive Bayes,balanced_benign,domain_seen_in_train,unseen domain,3420,0.014035087719298246
+Naive Bayes,urlhaus,has_ip_host,IP-address host,25372,1.0
+Naive Bayes,urlhaus,has_ip_host,domain host,4628,0.1707000864304235
+Naive Bayes,urlhaus,domain_seen_in_train,domain seen in training,285,0.08070175438596491
+Naive Bayes,urlhaus,domain_seen_in_train,unseen domain,29715,0.8796567390206966
+KNN,test,subtype,benign,18258,0.08790667104830759
+KNN,test,subtype,defacement,4836,0.8099669148056244
+KNN,test,subtype,malware,1288,0.875
+KNN,test,subtype,phishing,5618,0.7221431114275543
+KNN,balanced_malicious,domain_seen_in_train,domain seen in training,2510,0.2856573705179283
+KNN,balanced_malicious,domain_seen_in_train,unseen domain,27490,0.32313568570389234
+KNN,balanced_benign,domain_seen_in_train,domain seen in training,770,0.5532467532467532
+KNN,balanced_benign,domain_seen_in_train,unseen domain,3420,0.2546783625730994
+KNN,urlhaus,has_ip_host,IP-address host,25372,1.0
+KNN,urlhaus,has_ip_host,domain host,4628,0.3163353500432152
+KNN,urlhaus,domain_seen_in_train,domain seen in training,285,0.22456140350877193
+KNN,urlhaus,domain_seen_in_train,unseen domain,29715,0.9009591115598182
+Decision Tree,test,subtype,benign,18258,0.12427429072187535
+Decision Tree,test,subtype,defacement,4836,0.8341604631927213
+Decision Tree,test,subtype,malware,1288,0.8773291925465838
+Decision Tree,test,subtype,phishing,5618,0.7771448914204343
+Decision Tree,balanced_malicious,domain_seen_in_train,domain seen in training,2510,0.40756972111553785
+Decision Tree,balanced_malicious,domain_seen_in_train,unseen domain,27490,0.3886867951982539
+Decision Tree,balanced_benign,domain_seen_in_train,domain seen in training,770,0.5688311688311688
+Decision Tree,balanced_benign,domain_seen_in_train,unseen domain,3420,0.2608187134502924
+Decision Tree,urlhaus,has_ip_host,IP-address host,25372,0.9982263912974934
+Decision Tree,urlhaus,has_ip_host,domain host,4628,0.3869922212618842
+Decision Tree,urlhaus,domain_seen_in_train,domain seen in training,285,0.5157894736842106
+Decision Tree,urlhaus,domain_seen_in_train,unseen domain,29715,0.9076560659599529
+Random Forest,test,subtype,benign,18258,0.07142074706977763
+Random Forest,test,subtype,defacement,4836,0.8221670802315963
+Random Forest,test,subtype,malware,1288,0.8695652173913043
+Random Forest,test,subtype,phishing,5618,0.7474190103239587
+Random Forest,balanced_malicious,domain_seen_in_train,domain seen in training,2510,0.2621513944223108
+Random Forest,balanced_malicious,domain_seen_in_train,unseen domain,27490,0.2776646053110222
+Random Forest,balanced_benign,domain_seen_in_train,domain seen in training,770,0.5844155844155844
+Random Forest,balanced_benign,domain_seen_in_train,unseen domain,3420,0.2698830409356725
+Random Forest,urlhaus,has_ip_host,IP-address host,25372,1.0
+Random Forest,urlhaus,has_ip_host,domain host,4628,0.24006050129645634
+Random Forest,urlhaus,domain_seen_in_train,domain seen in training,285,0.3192982456140351
+Random Forest,urlhaus,domain_seen_in_train,unseen domain,29715,0.888170957428908
+Gradient Boosting,test,subtype,benign,18258,0.1028042501916968
+Gradient Boosting,test,subtype,defacement,4836,0.8573200992555832
+Gradient Boosting,test,subtype,malware,1288,0.8858695652173914
+Gradient Boosting,test,subtype,phishing,5618,0.7769668921324314
+Gradient Boosting,balanced_malicious,domain_seen_in_train,domain seen in training,2510,0.3454183266932271
+Gradient Boosting,balanced_malicious,domain_seen_in_train,unseen domain,27490,0.35354674427064386
+Gradient Boosting,balanced_benign,domain_seen_in_train,domain seen in training,770,0.6012987012987013
+Gradient Boosting,balanced_benign,domain_seen_in_train,unseen domain,3420,0.32748538011695905
+Gradient Boosting,urlhaus,has_ip_host,IP-address host,25372,0.9999211729465552
+Gradient Boosting,urlhaus,has_ip_host,domain host,4628,0.38159031979256697
+Gradient Boosting,urlhaus,domain_seen_in_train,domain seen in training,285,0.5333333333333333
+Gradient Boosting,urlhaus,domain_seen_in_train,unseen domain,29715,0.9080935554433788
