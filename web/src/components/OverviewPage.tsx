@@ -2,7 +2,7 @@ import React from 'react';
 
 export const OverviewPage: React.FC = () => {
   return (
-    <main id="p-home" className="on">
+    <main id="p-home" className="on" style={{ paddingBottom: 96 }}>
       <div className="wrap">
         <section className="hero">
           <h1>A malicious link gives itself away in its own spelling.</h1>
