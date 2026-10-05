@@ -119,7 +119,8 @@ export const TestPage: React.FC = () => {
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 900);
-      const res = await fetch(`http://127.0.0.1:5001/api/predict?url=${encodeURIComponent(target)}`, {
+      const apiBase = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5001';
+      const res = await fetch(`${apiBase}/api/predict?url=${encodeURIComponent(target)}`, {
         signal: controller.signal
       });
       clearTimeout(timeout);

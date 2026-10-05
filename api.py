@@ -53,11 +53,11 @@ class PredictionHandler(BaseHTTPRequestHandler):
             qs = parse_qs(parsed.query)
             raw_url = qs.get("url", [""])[0]
             self.handle_predict(raw_url)
-        elif parsed.path == "/api/health":
+        elif parsed.path in ["/", "/health", "/api/health"]:
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
-            self.wfile.write(json.dumps({"status": "ok", "model": "Random Forest (100 Trees)"}).encode("utf-8"))
+            self.wfile.write(json.dumps({"status": "ok", "service": "URL_Guard ML API", "model": "Random Forest (100 Trees)"}).encode("utf-8"))
         else:
             self.send_response(404)
             self.end_headers()
@@ -157,9 +157,9 @@ class PredictionHandler(BaseHTTPRequestHandler):
         pass
 
 def main():
-    port = 5001
-    server = HTTPServer(("127.0.0.1", port), PredictionHandler)
-    print(f"[+] Prediction API serving live at http://127.0.0.1:{port}/api/predict")
+    port = int(os.environ.get("PORT", 5001))
+    server = HTTPServer(("0.0.0.0", port), PredictionHandler)
+    print(f"[+] Prediction API serving live on 0.0.0.0:{port} (/api/predict)")
     try:
         server.serve_forever()
     except KeyboardInterrupt:
