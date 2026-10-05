@@ -143,9 +143,15 @@ st.markdown("""
 
 @st.cache_resource
 def load_model():
-    p = os.path.join(PROJECT_ROOT, "models", "random_forest_model.pkl")
-    if os.path.exists(p):
-        return joblib.load(p)
+    candidates = [
+        "random_forest_model.joblib",
+        "random_forest_model.xz",
+        "random_forest_model.pkl"
+    ]
+    for c in candidates:
+        p = os.path.join(PROJECT_ROOT, "models", c)
+        if os.path.exists(p):
+            return joblib.load(p)
     return None
 
 model = load_model()
