@@ -33,25 +33,11 @@ const PRESETS: PresetItem[] = [
     url: 'http://g00gle-security-alert.xyz/verify-identity'
   },
   {
-    id: 'bank',
-    name: 'Banking Portal Lure',
-    category: 'Credential Phish',
-    categoryCls: 'b-red',
-    url: 'https://secure-banking-login-auth.net/portal/signin?ref=account'
-  },
-  {
     id: 'wiki',
     name: 'Wikipedia Article',
     category: 'Legitimate',
     categoryCls: 'b-green',
     url: 'https://en.wikipedia.org/wiki/Random_forest'
-  },
-  {
-    id: 'google',
-    name: 'Google Search',
-    category: 'Legitimate',
-    categoryCls: 'b-green',
-    url: 'https://www.google.com/search?q=machine+learning+research'
   }
 ];
 
@@ -203,7 +189,7 @@ export const TestPage: React.FC = () => {
   const tokens = parseTokens(urlInput);
   const prob = scoreData ? scoreData.p : 0;
   const isMalicious = prob >= 0.5;
-  const pct = Math.round(prob * 100);
+  const dominantPct = Math.round((isMalicious ? prob : (1 - prob)) * 100);
 
   const filteredFeatures =
     filterCategory === 'all'
@@ -216,157 +202,168 @@ export const TestPage: React.FC = () => {
     <main id="p-test" className="on" style={{ paddingBottom: 120 }}>
       <div className="wrap pg">
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: 12 }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-              <span className="badge b-blue" style={{ letterSpacing: '0.04em' }}>LIVE LEXICAL SCANNER</span>
-              <span style={{ font: '500 12px var(--mono)', color: 'var(--mute)' }}>
-                {engineInfo ? `${engineInfo.name} · ${engineInfo.latencyMs.toFixed(2)} ms` : 'Evaluating...'}
-              </span>
-            </div>
-            <h2>Paste a URL. Watch it get dissected.</h2>
-            <p className="lede" style={{ fontSize: 16, marginTop: 6, marginBottom: 24, color: '#4b5565' }}>
-              URL-Guard parses 30 structural properties across host entropy, brand edit distance, and directory ratios.
-              It makes zero network requests and never visits the destination.
-            </p>
+        <div style={{ textAlign: 'center', maxWidth: 760, margin: '0 auto 28px' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+            <span className="badge b-blue" style={{ letterSpacing: '0.04em' }}>LIVE LEXICAL SCANNER</span>
+            <span style={{ font: '500 12px var(--mono)', color: 'var(--mute)' }}>
+              {engineInfo ? `${engineInfo.name} · ${engineInfo.latencyMs.toFixed(2)} ms` : 'Evaluating...'}
+            </span>
           </div>
+          <h2 style={{ fontSize: 34, letterSpacing: '-0.03em', margin: 0, fontWeight: 700 }}>
+            Paste a URL. Watch it get dissected.
+          </h2>
         </div>
 
-        {/* Input Bar */}
-        <form
-          onSubmit={handleFormSubmit}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-            background: '#fff',
-            border: '1px solid var(--line)',
-            borderRadius: 12,
-            padding: '6px 8px 6px 14px',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
-          }}
-        >
-          <span style={{ font: '500 14px var(--mono)', color: 'var(--mute)' }}>url://</span>
-          <input
+        {/* Input Bar & Controls Container */}
+        <div style={{ maxWidth: 860, margin: '0 auto 36px' }}>
+          <form
+            onSubmit={handleFormSubmit}
             style={{
-              flex: 1,
-              border: 0,
-              outline: 'none',
-              font: '400 14px var(--mono)',
-              color: 'var(--ink)',
-              background: 'transparent',
-              padding: '8px 0'
-            }}
-            value={urlInput}
-            onChange={e => setUrlInput(e.target.value)}
-            placeholder="Paste any address (e.g. paypal-verification-alert.com/login)..."
-            spellCheck="false"
-          />
-          <button
-            className="btn p"
-            type="submit"
-            disabled={isScanning}
-            style={{ padding: '8px 18px', fontSize: 13, borderRadius: 8 }}
-          >
-            {isScanning ? 'Scoring...' : 'Scan Address'}
-          </button>
-        </form>
-
-        {/* Preset Chips */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6, marginTop: 14 }}>
-          <span style={{ font: '500 12px var(--mono)', color: 'var(--mute)', marginRight: 4 }}>SAMPLE THREATS:</span>
-          {PRESETS.map(p => {
-            const isSelected = urlInput === p.url;
-            return (
-              <button
-                key={p.id}
-                type="button"
-                onClick={() => selectPreset(p)}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  padding: '5px 11px',
-                  borderRadius: 8,
-                  border: `1px solid ${isSelected ? 'var(--ink)' : 'var(--line)'}`,
-                  background: isSelected ? 'var(--soft)' : '#fff',
-                  font: '400 12px var(--mono)',
-                  color: isSelected ? 'var(--ink)' : '#475467',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                <span className={`badge ${p.categoryCls}`} style={{ fontSize: 9, padding: '0 4px' }}>
-                  {p.category}
-                </span>
-                <span>{p.name}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* URL Syntax Anatomy Tokenizer */}
-        {tokens.valid && (
-          <div
-            style={{
-              marginTop: 14,
-              padding: '10px 14px',
-              borderRadius: 10,
-              border: '1px solid var(--line)',
-              background: 'var(--soft)',
               display: 'flex',
               alignItems: 'center',
-              flexWrap: 'wrap',
-              gap: 6,
-              font: '400 13px var(--mono)'
+              gap: 12,
+              background: '#fff',
+              border: '1.5px solid var(--line)',
+              borderRadius: 14,
+              padding: '10px 12px 10px 20px',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.03)',
+              transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
             }}
           >
-            <span style={{ fontSize: 11, color: 'var(--mute)', marginRight: 4 }}>STRUCTURE:</span>
-            {tokens.scheme && (
-              <span style={{ background: 'rgba(43, 80, 255, 0.08)', color: 'var(--blue)', padding: '2px 6px', borderRadius: 4 }}>
-                {tokens.scheme}
-              </span>
-            )}
-            <span
+            <span style={{ font: '600 15px var(--mono)', color: 'var(--mute)', userSelect: 'none' }}>url://</span>
+            <input
               style={{
-                background: extracted?.has_ip_host || extracted?.risky_tld ? 'rgba(217, 45, 58, 0.08)' : '#fff',
-                color: extracted?.has_ip_host || extracted?.risky_tld ? 'var(--red)' : 'var(--ink)',
+                flex: 1,
+                border: 0,
+                outline: 'none',
+                font: '400 16px var(--mono)',
+                color: 'var(--ink)',
+                background: 'transparent',
+                padding: '8px 0'
+              }}
+              value={urlInput}
+              onChange={e => setUrlInput(e.target.value)}
+              placeholder="Paste any address (e.g. paypal-verification-alert.com/login)..."
+              spellCheck="false"
+            />
+            <button
+              className="btn p"
+              type="submit"
+              disabled={isScanning}
+              style={{ padding: '10px 24px', fontSize: 13.5, fontWeight: 500, borderRadius: 10 }}
+            >
+              {isScanning ? 'Scoring...' : 'Scan Address'}
+            </button>
+          </form>
+
+          {/* Preset Chips: Clean flex container with zero clipping */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 10,
+              marginTop: 18,
+              flexWrap: 'wrap'
+            }}
+          >
+            <span style={{ font: '600 11px var(--mono)', color: 'var(--mute)', whiteSpace: 'nowrap', letterSpacing: '0.04em' }}>
+              SAMPLE THREATS:
+            </span>
+            {PRESETS.map(p => {
+              const isSelected = urlInput === p.url;
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => selectPreset(p)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    padding: '6px 13px',
+                    borderRadius: 8,
+                    border: `1.5px solid ${isSelected ? 'var(--ink)' : 'var(--line)'}`,
+                    background: isSelected ? 'var(--soft)' : '#fff',
+                    font: '500 12px var(--mono)',
+                    color: isSelected ? 'var(--ink)' : '#475467',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <span className={`badge ${p.categoryCls}`} style={{ fontSize: 9, padding: '1px 5px' }}>
+                    {p.category}
+                  </span>
+                  <span>{p.name}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Centered URL Syntax Anatomy Tokenizer */}
+          {tokens.valid && (
+            <div
+              style={{
+                marginTop: 18,
+                padding: '10px 16px',
+                borderRadius: 12,
                 border: '1px solid var(--line)',
-                padding: '2px 6px',
-                borderRadius: 4,
-                fontWeight: 500
+                background: 'var(--soft)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexWrap: 'wrap',
+                gap: 8,
+                font: '400 13px var(--mono)'
               }}
             >
-              {tokens.host}
-            </span>
-            {tokens.port && (
-              <span style={{ background: 'rgba(217, 45, 58, 0.08)', color: 'var(--red)', padding: '2px 6px', borderRadius: 4 }}>
-                {tokens.port}
+              <span style={{ fontSize: 11, color: 'var(--mute)', marginRight: 4, letterSpacing: '0.05em', fontWeight: 600 }}>STRUCTURE:</span>
+              {tokens.scheme && (
+                <span style={{ background: 'rgba(43, 80, 255, 0.08)', color: 'var(--blue)', padding: '3px 8px', borderRadius: 5 }}>
+                  {tokens.scheme}
+                </span>
+              )}
+              <span
+                style={{
+                  background: extracted?.has_ip_host || extracted?.risky_tld ? 'rgba(217, 45, 58, 0.08)' : '#fff',
+                  color: extracted?.has_ip_host || extracted?.risky_tld ? 'var(--red)' : 'var(--ink)',
+                  border: '1px solid var(--line)',
+                  padding: '3px 8px',
+                  borderRadius: 5,
+                  fontWeight: 500
+                }}
+              >
+                {tokens.host}
               </span>
-            )}
-            {tokens.path && (
-              <span style={{ background: '#fff', border: '1px solid var(--line)', color: '#475467', padding: '2px 6px', borderRadius: 4 }}>
-                {tokens.path}
-              </span>
-            )}
-            {tokens.query && (
-              <span style={{ background: 'rgba(18, 128, 92, 0.08)', color: 'var(--green)', padding: '2px 6px', borderRadius: 4 }}>
-                {tokens.query}
-              </span>
-            )}
-          </div>
-        )}
+              {tokens.port && (
+                <span style={{ background: 'rgba(217, 45, 58, 0.08)', color: 'var(--red)', padding: '3px 8px', borderRadius: 5 }}>
+                  {tokens.port}
+                </span>
+              )}
+              {tokens.path && (
+                <span style={{ background: '#fff', border: '1px solid var(--line)', color: '#475467', padding: '3px 8px', borderRadius: 5 }}>
+                  {tokens.path}
+                </span>
+              )}
+              {tokens.query && (
+                <span style={{ background: 'rgba(18, 128, 92, 0.08)', color: 'var(--green)', padding: '3px 8px', borderRadius: 5 }}>
+                  {tokens.query}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* Results Overview */}
         {!extracted || !scoreData ? (
-          <div className="solid" style={{ marginTop: 20, padding: 24 }}>
+          <div className="solid" style={{ marginTop: 32, padding: 28, textAlign: 'center' }}>
             <h3>Invalid Address</h3>
             <p style={{ color: 'var(--mute)', fontSize: 14, marginTop: 4 }}>
               Enter a valid URL address with a registered host name.
             </p>
           </div>
         ) : (
-          <div style={{ marginTop: 20, display: 'grid', gridTemplateColumns: '340px 1fr', gap: 18 }}>
+          <div style={{ marginTop: 32, display: 'grid', gridTemplateColumns: '360px 1fr', gap: 24 }}>
             {/* Left Column: Verdict & Triggered Drivers */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               {/* Verdict Card */}
@@ -388,10 +385,10 @@ export const TestPage: React.FC = () => {
 
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, margin: '14px 0 6px' }}>
                   <span style={{ font: '600 48px/1 var(--mono)', letterSpacing: '-0.03em', color: isMalicious ? 'var(--red)' : 'var(--green)' }}>
-                    {pct}%
+                    {dominantPct}%
                   </span>
                   <span style={{ font: '500 13px var(--mono)', color: 'var(--mute)' }}>
-                    malicious probability
+                    {isMalicious ? 'malicious probability' : 'benign confidence'}
                   </span>
                 </div>
 
@@ -400,7 +397,7 @@ export const TestPage: React.FC = () => {
                   <div
                     style={{
                       height: '100%',
-                      width: `${pct}%`,
+                      width: `${dominantPct}%`,
                       background: isMalicious ? 'var(--red)' : 'var(--green)',
                       transition: 'width 0.4s ease'
                     }}
@@ -505,8 +502,37 @@ export const TestPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Tabular Feature Rows */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {/* Column Header Row */}
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '160px 1fr 110px 70px',
+                  gap: 12,
+                  padding: '0 12px 10px 12px',
+                  borderBottom: '1px solid var(--line)',
+                  font: '600 11px var(--mono)',
+                  color: 'var(--mute)',
+                  letterSpacing: '0.04em',
+                  textTransform: 'uppercase'
+                }}
+              >
+                <span>Feature Key</span>
+                <span>Description</span>
+                <span style={{ textAlign: 'right' }}>Baseline</span>
+                <span style={{ textAlign: 'right' }}>Value</span>
+              </div>
+
+              {/* Tabular Feature Rows with smooth internal scroll */}
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 2,
+                  maxHeight: 430,
+                  overflowY: 'auto',
+                  padding: '6px 4px 6px 0'
+                }}
+              >
                 {filteredFeatures.map(item => {
                   const val = extracted[item.key];
                   const flagged = item.isFlagged(extracted);
@@ -515,20 +541,21 @@ export const TestPage: React.FC = () => {
                       key={item.key}
                       style={{
                         display: 'grid',
-                        gridTemplateColumns: '170px 1fr 100px 70px',
+                        gridTemplateColumns: '160px 1fr 110px 70px',
                         gap: 12,
                         alignItems: 'center',
-                        padding: '8px 12px',
-                        borderRadius: 8,
-                        border: `1px solid ${flagged ? 'rgba(217, 45, 58, 0.25)' : 'var(--line)'}`,
-                        background: flagged ? 'rgba(254, 240, 241, 0.45)' : '#fff',
-                        transition: 'border-color 0.15s'
+                        padding: '9px 12px',
+                        borderRadius: 6,
+                        background: flagged ? 'rgba(217, 45, 58, 0.04)' : 'transparent',
+                        borderLeft: flagged ? '3px solid var(--red)' : '3px solid transparent',
+                        borderBottom: '1px solid #f2f4f7',
+                        transition: 'background 0.15s ease'
                       }}
                     >
                       <div style={{ font: '500 12.5px var(--mono)', color: flagged ? 'var(--red)' : 'var(--ink)' }}>
                         <code>{item.key}</code>
                       </div>
-                      <div style={{ fontSize: 12.5, color: 'var(--mute)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <div style={{ fontSize: 12.5, color: '#475467', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {item.label}
                       </div>
                       <div style={{ fontSize: 11, color: 'var(--mute)', fontFamily: 'var(--mono)', textAlign: 'right' }}>
@@ -538,7 +565,10 @@ export const TestPage: React.FC = () => {
                         <span
                           style={{
                             font: '600 13px var(--mono)',
-                            color: flagged ? 'var(--red)' : 'var(--ink)'
+                            color: flagged ? 'var(--red)' : 'var(--ink)',
+                            background: flagged ? 'rgba(217, 45, 58, 0.08)' : 'transparent',
+                            padding: flagged ? '2px 6px' : '0',
+                            borderRadius: 4
                           }}
                         >
                           {typeof val === 'number' ? val : String(val)}

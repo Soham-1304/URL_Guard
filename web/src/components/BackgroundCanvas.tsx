@@ -153,7 +153,6 @@ export const BackgroundCanvas: React.FC = () => {
       cx.textBaseline = 'middle';
 
       const hr = my >= 0 ? Math.floor(my / LH) : -9;
-      let activePill: { text: string; col: string; sub?: string } | null = null;
 
       rows.forEach((r, i) => {
         if (!reduce) {
@@ -178,52 +177,22 @@ export const BackgroundCanvas: React.FC = () => {
           ci = ((ci % r.L) + r.L) % r.L;
           const sg = r.segs.find(g => ci >= g.a && ci < g.b);
           if (sg) {
-            // Live real-time scoring on the exact hovered address
             const liveFeats = feats(sg.url);
             const liveScore = liveFeats ? score(liveFeats) : { p: sg.p, why: [] };
             const bad = liveScore.p >= 0.5;
             const col = bad ? '217,45,58' : '18,128,92';
-            const pct = Math.round(liveScore.p * 100);
 
+            // Change ONLY URL text color without any background rectangle
             [x0, x0 + P].forEach(bx => {
               const x = bx + sg.a * cw;
               if (x + sg.url.length * cw > 0 && x < W) {
-                cx.fillStyle = `rgba(${col},.1)`;
-                cx.fillRect(x - 3, y - LH / 2 + 2, sg.url.length * cw + 6, LH - 4);
                 cx.fillStyle = `rgb(${col})`;
                 cx.fillText(sg.url, x, y);
               }
             });
-
-            activePill = {
-              text: `${bad ? '▲ MALICIOUS' : '● BENIGN'} ${pct}%`,
-              col,
-              sub: liveScore.why[0] || (bad ? 'structural risk' : 'clean format')
-            };
           }
         }
       });
-
-      // Refined real-time telemetry badge
-      if (activePill) {
-        const pill = activePill as { text: string; col: string; sub?: string };
-        cx.font = '500 11.5px "Geist Mono", monospace';
-        const label = pill.sub ? `${pill.text} · ${pill.sub}` : pill.text;
-        const tw = cx.measureText(label).width + 20;
-        const tx = Math.min(mx + 12, W - tw - 12);
-        const ty = Math.min(my + 14, H - 28);
-
-        cx.fillStyle = '#ffffff';
-        cx.strokeStyle = `rgba(${pill.col}, 0.5)`;
-        cx.lineWidth = 1;
-        cx.beginPath();
-        cx.roundRect(tx, ty, tw, 22, 5);
-        cx.fill();
-        cx.stroke();
-
-        cx.fillStyle = `rgb(${pill.col})`;
-        cx.fillText(label, tx + 10, ty + 11.5);
-      }
 
       animId = requestAnimationFrame(draw);
     }
