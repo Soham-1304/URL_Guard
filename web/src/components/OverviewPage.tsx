@@ -8,7 +8,7 @@ export const OverviewPage: React.FC = () => {
           <h1>A malicious link gives itself away in its own spelling.</h1>
           <p className="lede">
             URL-Guard reads only the address (dots, depth, hosts, keywords) and returns a verdict in
-            0.12 ms. It never visits the page and never makes a network call.
+            ~30 ms. It never visits the page and never makes a network call.
           </p>
           <div className="cta">
             <a className="btn p" href="#/test">

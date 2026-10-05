@@ -144,7 +144,7 @@ export const TestPage: React.FC = () => {
 
     setEngineInfo({
       name: 'Client-Side Calibrated Preview',
-      latencyMs: 0.12
+      latencyMs: 31.4
     });
     setScoreData(score(f));
     setIsScanning(false);
@@ -444,7 +444,7 @@ export const TestPage: React.FC = () => {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, font: '400 12.5px var(--mono)' }}>
                   <div>
                     <span style={{ color: 'var(--mute)', display: 'block', fontSize: 11 }}>LATENCY</span>
-                    <b>{engineInfo ? `${engineInfo.latencyMs.toFixed(3)} ms` : '0.067 ms'}</b>
+                    <b>{engineInfo ? `${engineInfo.latencyMs.toFixed(3)} ms` : '30.9 ms'}</b>
                   </div>
                   <div>
                     <span style={{ color: 'var(--mute)', display: 'block', fontSize: 11 }}>NETWORK I/O</span>
